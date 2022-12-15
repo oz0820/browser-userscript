@@ -2,10 +2,10 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2022.12.16.0
+// @version      2022.12.16.1
 // @description  小説家になろうをキーボードだけで読むためのツール。
 // @match        https://ncode.syosetu.com/*
-// @updateURL    https://raw.githubusercontent.com/oz0820/syosetuTool/main/shosetuTool.user.js
+// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/syosetuTool/shosetu_tool.user.js
 // @icon         https://syosetu.com/favicon.ico
 // ==/UserScript==
 

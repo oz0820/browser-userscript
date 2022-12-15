@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Promo-tweet remover
 // @namespace    https://twitter.com/oz0820
-// @version      2022.12.16.0
+// @version      2022.12.16.1
 // @description  ツイッターのプロモツイートを消します。
 // @author       oz0820
 // @match        https://twitter.com/home*
 // @match        https://mobile.twitter.com/home*
+// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/remove-promo-tweet/promo_tweet_remover.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=twitter.com
 // ==/UserScript==
 
