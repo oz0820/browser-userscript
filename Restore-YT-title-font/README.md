@@ -1,0 +1,4 @@
+# Restore_YT_title_font
+
+Youtubeのクソダサになってしまったフォントを無理矢理戻します。  
+動けば良い精神に則り、HTMLタグにダイレクトにStyle適用しています。
