@@ -1,6 +1,6 @@
 # Youtube thumbnail button
 
-Youtubeを再生中にパパッとサムネを表示するサムネです。
+Youtubeを再生中にパパッとサムネを表示するツールです。
 
 ### インストール
 - [tampermonkey](https://www.tampermonkey.net/)とかユーザースクリプトを実行できる拡張機能をインスコする。
