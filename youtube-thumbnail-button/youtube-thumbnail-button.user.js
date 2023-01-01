@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.01.6
+// @version      2023.01.01.7
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -13,6 +13,8 @@
     let thumbnail_url = "";
     let thumbnail_ok = false;
     let href = window.location.href;
+
+    const sleep = ms => new Promise(res => setTimeout(res, ms))
 
     // ページ移動を検出します
     const observer = new MutationObserver(function () {
@@ -49,29 +51,27 @@
     function set_extended_thumbnail() {
         set_url();
         // サムネのURLが確定するまで待ちます
-        wait();
-        async function wait() {
+        run();
+        async function run() {
             for (let i = 0; i < 100; i++) {
                 if (thumbnail_ok) {
+                    try {
+                        let elm = document.getElementById('extended_thumbnail');
+                        elm.src = thumbnail_url;
+                    } catch (e) {
+                        let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0]
+                        let html = '' +
+                            '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer" style="border-radius: 15px">' +
+                            ''
+                        elm.insertAdjacentHTML('afterbegin', html);
+                    }
                     break;
                 }
                 await sleep(100);
             }
         }
-
-        try {
-            let elm = document.getElementById('extended_thumbnail');
-            elm.src = thumbnail_url;
-        } catch (e) {
-            let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0]
-            let html = '' +
-                '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer" style="border-radius: 15px">' +
-                ''
-            elm.insertAdjacentHTML('afterbegin', html);
-        }
     }
 
-    const sleep = ms => new Promise(res => setTimeout(res, ms))
     async function init() {
         for (let i = 0; i < 50; i++) {
             try {
