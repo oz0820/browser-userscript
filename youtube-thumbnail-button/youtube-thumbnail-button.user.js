@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2022.12.31.0
+// @version      2023.01.01.0
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
-// @match        https://www.youtube.com/watch*
+// @match        https://www.youtube.com/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-thumbnail-button/youtube-thumbnail-button.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
@@ -20,7 +20,18 @@
                 console.log("【YoutubeThumbnailButton】ビデオIDが見つからないぞ")
                 return;
             }
+
             let thumbnail_url = "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg";
-            window.open(thumbnail_url);
+            fetch(thumbnail_url)
+                .then((response) => {
+                    console.log(response.status)
+                    if (response.status !== 200) {
+                        thumbnail_url = "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg";
+                    }
+                    window.open(thumbnail_url);
+                })
+                .catch((error) => {
+                    console.log("サムネURLを取得できません")
+                });
         });
 })();
