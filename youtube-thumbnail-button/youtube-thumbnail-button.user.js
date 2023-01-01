@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.01.4
+// @version      2023.01.01.5
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -28,7 +28,7 @@
         let param_search = new URLSearchParams(window.location.search);
         let video_id = param_search.get('v');
         if (video_id == null) {
-            console.log("【YoutubeThumbnailButton】ビデオIDが見つからないぞ")
+            // console.log("【YoutubeThumbnailButton】ビデオIDが見つからないぞ")
             return "";
         }
         thumbnail_url = "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg";
@@ -44,7 +44,6 @@
     }
 
     // 関連動画の上にサムネを埋め込みます
-    // 初回実行時は表示されないことが多いです
     function set_extended_thumbnail() {
         set_url();
         setTimeout(function () {
@@ -54,7 +53,7 @@
             } catch (e) {
                 let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0]
                 let html = '' +
-                    '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer">' +
+                    '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer" style="border-radius: 15px">' +
                     ''
                 elm.insertAdjacentHTML('afterbegin', html);
             }
@@ -63,7 +62,6 @@
     }
 
     const sleep = ms => new Promise(res => setTimeout(res, ms))
-
     async function init() {
         for (let i = 0; i < 50; i++) {
             try {
