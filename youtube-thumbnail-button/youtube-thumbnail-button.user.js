@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.01.2
+// @version      2023.01.01.3
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -57,19 +57,28 @@
         }, 1000);
     }
 
+    const sleep = ms => new Promise(res => setTimeout(res, ms))
 
-    // 操作対象が表示されるまで1000ms待ちます
-    setTimeout(function () {
-        // サムネイルを埋め込んで
-        set_extended_thumbnail()
-        // 雑にボタン追加して
-        document.getElementsByClassName('ytp-right-controls')[0].insertAdjacentHTML('afterbegin', '<button class="ytp-controls" type="button" id="show_thumbnail_button" aria-label="サムネイルを表示する" title="サムネイルを表示する" style="background: none; fill: white; border: none; cursor: pointer; float: left; outline: none; overflow: visible; padding: 0px 0px 0em; width: 3em;"><svg viewBox="0 0 16 16" style="width: 60%;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>');
+    async function init() {
+        for (let i = 0; i < 50; i++) {
+            try {
+                // 雑にボタン追加して
+                document.getElementsByClassName('ytp-right-controls')[0].insertAdjacentHTML('afterbegin', '<button class="ytp-controls" type="button" id="show_thumbnail_button" aria-label="サムネイルを表示する" title="サムネイルを表示する" style="background: none; fill: white; border: none; cursor: pointer; float: left; outline: none; overflow: visible; padding: 0px 0px 0em; width: 3em;"><svg viewBox="0 0 16 16" style="width: 60%;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>');
+                break;
+            } catch (e) {
+                // なんもしないです
+            }
+            await sleep(100)
+        }
+
         // 新しいタブでビデオIDをねじ込んだサムネURLを開きます
         document.getElementById('show_thumbnail_button').addEventListener('click', function () {
             window.open(thumbnail_url)
         });
-
-    }, 1000);
+        // サムネイルを埋め込んで
+        set_extended_thumbnail()
+    }
+    init();
 
 })();
 
