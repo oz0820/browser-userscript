@@ -9,5 +9,5 @@ Youtubeを再生中にパパッとサムネを表示するツールです。
 
 ### 使い方
 自動再生を切り替えるボタンの左側にそれっぽいボタンが追加されてるはずです。  
-押して下さい。
-
+押して下さい。  
+![押して欲しいボタン](https://raw.githubusercontent.com/oz0820/browser-userscript/images/youtube-thumbnail-button/img1.jpg)
