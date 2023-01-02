@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.02.0
+// @version      2023.01.02.1
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -74,6 +74,10 @@
                         let html = '' +
                             '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer" style="border-radius: 15px">' +
                             ''
+                        // 非ログイン状態だと関連動画と合体してしまうので、1行改行を入れる
+                        if (document.getElementsByTagName('yt-related-chip-cloud-renderer').length === 0) {
+                            html += '<br>'
+                        }
                         elm.insertAdjacentHTML('afterbegin', html);
                     }
                     break;
