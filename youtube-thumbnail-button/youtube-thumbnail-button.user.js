@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.01.7
+// @version      2023.01.02.0
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -21,7 +21,7 @@
         if (href !== window.location.href) {
             href = window.location.href;
             // 処理
-            console.log("【YTB】 URL Changed.")
+            logger("URL Changed.");
             thumbnail_ok = false;
             set_extended_thumbnail();
         }
@@ -32,19 +32,30 @@
         let param_search = new URLSearchParams(window.location.search);
         let video_id = param_search.get('v');
         if (video_id == null) {
-            return "";
+            return;
         }
-        thumbnail_url = "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg";
-        fetch(thumbnail_url)
-            .then((response) => {
-                if (response.status !== 200) {
-                    thumbnail_url = "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg";
+        // 画質良い順に並べる
+        const urls = ["https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg", "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg", "https://i.ytimg.com/vi/" + video_id + "/0.jpg"];
+        logger("check", thumbnail_url)
+        check_urls(urls).then(r => {
+            for (let i = 0; i < r.length; i++) {
+                logger("check", urls[i]);
+                if (r[i].status === 200) {
+                    logger("OK", urls[i]);
+                    thumbnail_url = urls[i];
+                    thumbnail_ok = true;
+                    return;
                 }
-                thumbnail_ok = true;
-            })
-            .catch(() => {
-                console.log("【YoutubeThumbnailButton】サムネURLを取得できません")
-            });
+            }
+        });
+    }
+
+    async function check_urls(urls) {
+        const results = [];
+        for (const url of urls) {
+            results.push(fetch(url));
+        }
+        return Promise.all(results)
     }
 
     // 関連動画の上にサムネを埋め込みます
@@ -99,6 +110,15 @@
         set_extended_thumbnail()
     }
     init();
+
+    function logger(...message) {
+        let out = "";
+        for (let i = 0; i < message.length; i++) {
+            out += String(message[i]);
+            out += " ";
+        }
+        console.log("【YTB】", out);
+    }
 
 })();
 
