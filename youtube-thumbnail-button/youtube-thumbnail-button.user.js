@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.02.1
+// @version      2023.01.03.0
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -14,7 +14,7 @@
     let thumbnail_ok = false;
     let href = window.location.href;
 
-    const sleep = ms => new Promise(res => setTimeout(res, ms))
+    const sleep = ms => new Promise(res => setTimeout(res, ms));
 
     // ページ移動を検出します
     const observer = new MutationObserver(function () {
@@ -26,7 +26,7 @@
             set_extended_thumbnail();
         }
     })
-    observer.observe(document, { childList: true, subtree: true })
+    observer.observe(document, { childList: true, subtree: true });
 
     function set_url() {
         let param_search = new URLSearchParams(window.location.search);
@@ -35,8 +35,12 @@
             return;
         }
         // 画質良い順に並べる
-        const urls = ["https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg", "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg", "https://i.ytimg.com/vi/" + video_id + "/0.jpg"];
-        logger("check", thumbnail_url)
+        const urls = [
+            "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg",
+            "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",
+            "https://i.ytimg.com/vi/" + video_id + "/0.jpg"
+        ];
+        logger("check", thumbnail_url);
         check_urls(urls).then(r => {
             for (let i = 0; i < r.length; i++) {
                 logger("check", urls[i]);
@@ -55,7 +59,7 @@
         for (const url of urls) {
             results.push(fetch(url));
         }
-        return Promise.all(results)
+        return Promise.all(results);
     }
 
     // 関連動画の上にサムネを埋め込みます
@@ -70,15 +74,16 @@
                         let elm = document.getElementById('extended_thumbnail');
                         elm.src = thumbnail_url;
                     } catch (e) {
-                        let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0]
-                        let html = '' +
-                            '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-watch-next-secondary-results-renderer" style="border-radius: 15px">' +
-                            ''
+                        let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0];
+                        let html = '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="border-radius: 15px" alt="extended_thumbnail" title="新しいタブで開く">';
                         // 非ログイン状態だと関連動画と合体してしまうので、1行改行を入れる
                         if (document.getElementsByTagName('yt-related-chip-cloud-renderer').length === 0) {
-                            html += '<br>'
+                            html += '<br>';
                         }
                         elm.insertAdjacentHTML('afterbegin', html);
+                        document.getElementById('extended_thumbnail').addEventListener('click', function () {
+                           window.open(thumbnail_url);
+                        });
                     }
                     break;
                 }
@@ -91,27 +96,35 @@
         for (let i = 0; i < 50; i++) {
             try {
                 // 雑にボタン追加します
-                document.getElementsByClassName('ytp-right-controls')[0].insertAdjacentHTML('afterbegin', '<button class="ytp-controls" type="button" id="show_thumbnail_button" aria-label="サムネイルを表示する" title="サムネイルを表示する" style="background: none; fill: white; border: none; cursor: pointer; float: left; outline: none; overflow: visible; padding: 0px 0px 0em; width: 3em;"><svg viewBox="0 0 16 16" style="width: 60%;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>');
+                let html = '' +
+                    '<button class="ytp-thumbnail-button ytp-button" id="show_thumbnail_button" aria-label="サムネイルを表示する" title="サムネイルを表示する">' +
+                        '<svg class="ytp-thumbnail-button-icon" height="100%" width="100%" viewBox="-8 -8 32 32" fill-opacity="1">' +
+                            '<path fill="#fff" d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />' +
+                            '<path fill="#fff" d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z" />' +
+                        '</svg>' +
+                    '</button>';
+
+                document.getElementsByClassName('ytp-right-controls')[0].insertAdjacentHTML('afterbegin', html);
                 break;
             } catch (e) {
                 // なんもしないです
             }
-            await sleep(100)
+            await sleep(100);
         }
         for (let i = 0; i < 50; i++) {
             try {
                 // 新しいタブでビデオIDをねじ込んだサムネURLを開きます
                 document.getElementById('show_thumbnail_button').addEventListener('click', function () {
-                    window.open(thumbnail_url)
+                    window.open(thumbnail_url);
                 });
             } catch (e) {
                 // なんもしないです
             }
-            await sleep(100)
+            await sleep(100);
         }
 
         // サムネイルを埋め込みます
-        set_extended_thumbnail()
+        set_extended_thumbnail();
     }
     init();
 
