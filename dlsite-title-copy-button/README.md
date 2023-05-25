@@ -1,0 +1,3 @@
+# DLSite title copy button
+DLSiteの作品ページで、タイトルをコピーするボタンを追加するスクリプトです。  
+ChatGPTで錬成したのでとりあえず動くクオリティ……
