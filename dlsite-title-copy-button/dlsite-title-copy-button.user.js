@@ -4,7 +4,6 @@
 // @version      2023.05.26.1
 // @description  DLSiteの作品ページで、タイトルをコピーするボタンを追加する
 // @author       oz0820
-// @match        https://twitter.com/home*
 // @match        https://www.dlsite.com/*/work/=/product_id/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/dlsite-title-copy-button/dlsite-title-copy-button.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=dlsite.com
