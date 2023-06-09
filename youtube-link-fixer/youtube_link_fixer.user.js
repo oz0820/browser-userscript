@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         YouTube Link Fixer
 // @namespace    https://twitter.com/oz0820
-// @version      2023.6.10.2
+// @version      2023.6.10.3
 // @description  「○○週間」とか言って左上のYoutubeトップへのリンクを書き換えられて困っている方向け。強引な実装なので重たいです。
 // @author       oz0820
 // @match        https://www.youtube.com/*
-// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube_link_fixer/youtube_link_fixer.user.js
+// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-link-fixer/youtube_link_fixer.user.js
+// @downloadURL  https://github.com/oz0820/browser-userscript/raw/main/youtube-link-fixer/youtube_link_fixer.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
 
