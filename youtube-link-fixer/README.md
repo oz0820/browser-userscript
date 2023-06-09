@@ -5,5 +5,5 @@
 
 ### インストール
 - [tampermonkey](https://www.tampermonkey.net/)とかユーザースクリプトを実行できる拡張機能をインスコする。
-- [ここ](https://github.com/oz0820/browser-userscript/raw/main/youtube_link_fixer/youtube_link_fixer.user.js)(このプロジェクトの最新コード)押す。
+- [ここ](https://github.com/oz0820/browser-userscript/raw/main/youtube-link-fixer/youtube_link_fixer.user.js)(このプロジェクトの最新コード)押す。
 - 指示に従ってインストール。
