@@ -1,7 +1,7 @@
 # TweetDeck Scrollbar Remover
 
 新しいTweetDeckのスクロールバーを消します。  
-横スクロールバーも消えるので、矢印キーやマウスのチルトをつ買ってください。
+横スクロールバーも消えるので、矢印キーやマウスのチルトを使ってください。
 
 ### インストール
 - [tampermonkey](https://www.tampermonkey.net/)とかユーザースクリプトを実行できる拡張機能をインスコする。
