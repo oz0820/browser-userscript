@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TweetDeck PopUpRemover
 // @namespace    https://twitter.com/oz0820
-// @version      2023.07.08.1
+// @version      2023.07.08.2
 // @description  旧Deckのポップアップを消し去る
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
@@ -10,37 +10,25 @@
 // ==/UserScript==
 
 (function() {
-    function wait() {
-        return new Promise(function(resolve) {
-            setTimeout(resolve, 5000); // 10秒待機
-        });
-    }
+    const css = `
+        .gryphon-beta-btn-container {
+        display: none;
+    }`;
 
-    // 待機後に監視を開始
-    wait().then(function() {
+    // HTML文書内の<head>要素を取得します。
+    let head = document.head || document.getElementsByTagName('head')[0];
 
-        // Cookieの値を取得する関数
-        function getCookieValue(cookieName) {
-            let cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.startsWith(cookieName + '=')) {
-                    return cookie.substring(cookieName.length + 1);
-                }
-            }
-            return null;
-        }
+    // <style>要素を作成します。
+    let style = document.createElement('style');
 
-        // 旧Deck以外だったら停止
-        if (getCookieValue('tweetdeck_version') === 'legacy') {
-            // 対象の要素を取得
-            let targetElements = document.getElementsByClassName("js-gryphon-beta-btn gryphon-beta-btn-container");
-            // 要素を削除
-            for (let i = targetElements.length - 1; i >= 0; i--) {
-                let element = targetElements[i];
-                element.parentNode.removeChild(element);
-            }
-        }
-    });
+    // <style>要素のtype属性をCSSに設定します。
+    style.type = 'text/css';
+
+    // テキストノードを作成してCSSを追加します。
+    style.appendChild(document.createTextNode(css));
+
+    // 最後に<head>要素に<style>要素を追加します。これによりCSSが適用されます。
+    head.appendChild(style);
+
 
 })();
