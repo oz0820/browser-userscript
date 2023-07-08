@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TweetDeck Scrollbar Remover
 // @namespace    https://twitter.com/oz0820
-// @version      2023.07.4.0
+// @version      2023.07.08.0
 // @description  新TweetDeckのスクロールバーを消します。弊害があるので自己責任でお願いします。
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
@@ -32,4 +32,30 @@
     // 最後に<head>要素に<style>要素を追加します。これによりCSSが適用されます。
     head.appendChild(style);
 
+
+    function wait() {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, 10000); // 10秒待機
+        });
+    }
+
+    // 待機後に監視を開始
+    wait().then(function() {
+
+        // 指定されたクラス名の要素を取得
+        let column_header = document.querySelectorAll('.css-1dbjc4n.r-gtdqiz.r-ipm5af.r-136ojw6');
+
+        // 横スクロールを適用するelements
+        let target_window = document.getElementsByClassName('css-1dbjc4n r-h2r02b r-18u37iz r-16y2uox r-lltvgl r-1imtxzf r-13qz1uu')[0];
+
+        // ホイールイベントを追加
+        column_header.forEach(function (element) {
+            element.addEventListener('wheel', function (event) {
+                // スクロールの値を取得
+                let scrollValue = event.deltaY;
+                // 横スクロール実行
+                target_window.scrollLeft += scrollValue;
+            });
+        });
+    });
 })();
