@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TweetDeck SquareProfilePic
 // @namespace    https://twitter.com/oz0820
-// @version      2023.07.08.0
-// @description  新TweetDeckのスクロールバーを消します。弊害があるので自己責任でお願いします。
+// @version      2023.07.08.1
+// @description  新TweetDeckのユーザーアイコンを四角くします。
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/tweetdeck-square-profile-pic/tweetdeck-square-profile-pic.user.js
