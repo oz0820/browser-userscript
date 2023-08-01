@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TweetDeck Scrollbar Remover
 // @namespace    https://twitter.com/oz0820
-// @version      2023.07.08.1
+// @version      2023.08.02.0
 // @description  新TweetDeckのスクロールバーを消します。弊害があるので自己責任でお願いします。
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
@@ -12,7 +12,7 @@
 (function() {
     // CSSを文字列として定義
     const css = `
-        .css-1dbjc4n::-webkit-scrollbar {
+        .css-1dbjc4n.r-1p0dtai.r-1d2f490.r-11yh6sk.r-1rnoaur.r-u8s1d.r-zchlnj.r-1bzj12m.r-ipm5af::-webkit-scrollbar {
             display:none;
         }
     `;
