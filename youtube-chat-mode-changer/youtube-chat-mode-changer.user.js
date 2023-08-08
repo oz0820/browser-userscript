@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube chat mode changer
 // @namespace    https://twitter.com/oz0820
-// @version      2023.08.08.1
+// @version      2023.08.08.2
 // @description  Youtubeのチャットのリプレイを常に全て表示します．
 // @author       oz0820
 // @match        https://www.youtube.com/watch*
@@ -30,7 +30,7 @@
             }, 500);
 
         } else {
-            setTimeout(fuga, 200);
+            setTimeout(fuga, 500);
         }
     }
 
