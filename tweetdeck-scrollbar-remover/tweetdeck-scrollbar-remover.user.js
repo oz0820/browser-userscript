@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TweetDeck Scrollbar Remover
 // @namespace    https://twitter.com/oz0820
-// @version      2023.08.02.1
-// @description  新TweetDeckのスクロールバーを消します。弊害があるので自己責任でお願いします。
+// @version      2023.08.21.0
+// @description  新TweetDeckのスクロールバーを消します。ついでにパディングを削って情報密度を上げます。弊害があるので自己責任でお願いします。
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/tweetdeck-scrollbar-remover/tweetdeck-scrollbar-remover.user.js
@@ -21,9 +21,16 @@
     }
     // CSSを文字列として定義
     const css = `
-        .css-1dbjc4n.r-1p0dtai.r-1d2f490.r-11yh6sk.r-1rnoaur.r-u8s1d.r-zchlnj.r-1bzj12m.r-ipm5af::-webkit-scrollbar {
-            display:none;
-        }
+.css-1dbjc4n.r-1p0dtai.r-1d2f490.r-11yh6sk.r-1rnoaur.r-u8s1d.r-zchlnj.r-1bzj12m.r-ipm5af::-webkit-scrollbar {
+    display:none;
+}
+.css-1dbjc4n.r-1iusvr4.r-16y2uox.r-1777fci.r-ig955 {
+    padding-bottom: 3px;
+}
+.css-1dbjc4n.r-1loqt21.r-18u37iz.r-1ny4l3l.r-1udh08x.r-qi0n3.r-c9eks5.r-o7ynqc.r-6416eg {
+    padding-right: 5px;
+    padding-left: 10px;
+}
     `;
 
     // HTML文書内の<head>要素を取得します。
