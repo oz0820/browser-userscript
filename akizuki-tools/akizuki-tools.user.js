@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.08.31.0
+// @version         2023.08.31.1
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/*
@@ -65,68 +65,67 @@ async function akizuki_tools(type) {
     create_notification('コピーされました');
 }
 
-
 function convert_full_width_to_half_width(input) {
     return input.replace(/[Ａ-Ｚａ-ｚ０-９！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［＼］＾＿｀｛｜｝]/g, function(match) {
         return String.fromCharCode(match.charCodeAt(0) - 0xFEE0);
     })
-        .replace(/　/g, ' ')       //全角スペース
-        .replace(/[‐－―]/g, '-')  //ハイフンいくつか
-        .replace(/[～〜]/g, '~');  // チルダいくつか
+        .replace(/　/g, ' ')
+        .replace(/[‐－―]/g, '-')
+        .replace(/[～〜]/g, '~');
 }
-
-function copy_to_clipboard(text) {
-    // 新しいテキストエリアを作成してテキストを設定
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-
-    // テキストエリアをDOMに追加（非表示にする）
-    document.body.appendChild(textarea);
-
-    // テキストエリアの選択範囲を選択
-    textarea.select();
-
-    // クリップボードにコピー
-    document.execCommand('copy');
-
-    // テキストエリアを削除
-    document.body.removeChild(textarea);
-}
-
 
 async function get_sales_floor(item_id) {
-    const timeoutMillis = 500;
+    const iframe = document.querySelector('iframe[class="akizuki_tools"]');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    // 埋め込んだiframe内から読み出し
     try {
-        const url = 'https://akizukidenshi.com/catalog/goods/warehouseinfo.aspx?goods=' + item_id;
+        return iframeDoc.querySelector('#detail_stockinfo > table > tbody > tr:nth-child(3) > td.storelist_.textleft_ > div').textContent.trim();
 
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), timeoutMillis)
-        );
+    // 失敗したら、ページをfetchして取り出す。
+    } catch (e) {
+        const timeoutMillis = 500;
+        try {
+            const url = 'https://akizukidenshi.com/catalog/goods/warehouseinfo.aspx?goods=' + item_id;
 
-        const fetchPromise = fetch(url);
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout')), timeoutMillis)
+            );
 
-        const response = await Promise.race([fetchPromise, timeoutPromise]);
+            const fetchPromise = fetch(url);
+            const response = await Promise.race([fetchPromise, timeoutPromise]);
+            if (!response) {
+                throw new Error('Fetch error');
+            }
 
-        if (!response) {
-            throw new Error('Fetch error');
+            const arrayBuffer = await response.arrayBuffer();
+
+            const decoder = new TextDecoder('shift_jis');
+            const html = decoder.decode(arrayBuffer);
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            return doc.querySelector('#detail_stockinfo > table > tbody > tr:nth-child(3) > td.storelist_.textleft_ > div').textContent.trim();
+
+        } catch (error) {
+            console.error('Error:', e.message);
+            create_notification('売り場の取得に失敗しました。', true);
+            create_notification(e.message, true);
+            return 'ERROR get_sales_floor'
         }
-
-        const arrayBuffer = await response.arrayBuffer();
-
-        // Shift_JISでデコード
-        const decoder = new TextDecoder('shift_jis');
-        const html = decoder.decode(arrayBuffer);
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        // ここで解析したい要素を選択して操作します
-        return doc.querySelector('#detail_stockinfo > table > tbody > tr:nth-child(3) > td.storelist_.textleft_ > div').textContent.trim();
-
-    } catch (error) {
-        console.error('Error:', error.message);
-        return 'ERROR get_sales_floor';
     }
+}
+
+
+
+function copy_to_clipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
 }
 
 
