@@ -14,10 +14,10 @@ I-14051
 1F 10 売場 キャビネット上段
 https://akizukidenshi.com/catalog/g/gI-14051/
 ```
-追加される要素のイメージ
+追加される要素のイメージ  
 ![Tool display example](https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img01.png)
 
-Google Todoに登録するとこんな感じ
+Google Todoに登録するとこんな感じ  
 ![GoogleTodoImage1](https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img02.png)
 ![GoogleTodoImage1](https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img03.png)
 
