@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name            Akizuki copy details to text
+// @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.08.29.0
-// @description     秋月電子通商の商品ページの内容をクリップボードにコピーするボタンを追加します。
+// @version         2023.08.31.0
+// @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/*
-// @updateURL       https://github.com/oz0820/browser-userscript/raw/main/akizuki-copy-details-to-text/akizuki-copy-details-to-text.user.js
+// @updateURL       https://github.com/oz0820/browser-userscript/raw/main/akizuki-tools/akizuki-tools.user.js
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=akizukidenshi.com
 // ==/UserScript==
 
@@ -13,28 +13,42 @@
 (function() {
     set_notification_container();
 
-    const anchor_elm = document.querySelector('#maincontents > table > tbody > tr:nth-child(1) > td > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(5) > td > br:nth-child(4)');
-    const add_elm2 =
-        `<div class="akizuki_copy_details_to_text">
-            <p>Akizuki copy details to text</p>
-            <button class="akizuki_copy_details_to_text" data-type="title">title</button>
-            <button class="akizuki_copy_details_to_text" data-type="description">description</button>
+    const item_id = document.querySelector('img[name="goods_l"]').src.split('/')[6].split('.')[0];
+    const html =
+        `<div class="akizuki_tools">
+            <div style="margin: 3px">
+                <button class="akizuki_tools" data-type="title">製品名</button>
+                <button class="akizuki_tools" data-type="description">詳細</button>
+            </div>
+            <iframe class="akizuki_tools" src="https://akizukidenshi.com/catalog/goods/warehouseinfo.aspx?goods=${item_id}" scrolling="no"></iframe>
         </div>`
 
-    anchor_elm.insertAdjacentHTML('afterend', add_elm2);
+    document.querySelector('div[class="detail_stocktitle_"]').insertAdjacentHTML('afterend', html);
 
-    const buttons = document.querySelectorAll('button[class="akizuki_copy_details_to_text"]');
+    document.querySelector('iframe[class="akizuki_tools"]').onload = () => {
+        const iframe = document.querySelector('iframe[class="akizuki_tools"]');
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.querySelector('p').remove();
+        iframeDoc.querySelector('th[style]').removeAttribute('style');
+        iframeDoc.querySelector('table').querySelector('div').setAttribute('style', 'margin: 2px; width: 50px;')
+        const table_height = iframeDoc.querySelector('table').clientHeight;
+        document.querySelector('iframe[class="akizuki_tools"]').setAttribute('style', `height: ${table_height+2}px;border: none;`);
+    }
+
+
+
+    const buttons = document.querySelectorAll('button[class="akizuki_tools"]');
     buttons.forEach(button => {
         button.addEventListener('click', function() {
             const type = this.getAttribute('data-type');
-            akizuki_copy_details_to_text(type).then();
+            akizuki_tools(type).then();
         });
     });
 })();
 
 
 
-async function akizuki_copy_details_to_text(type) {
+async function akizuki_tools(type) {
     if ("title" === type) {
         const item_name = document.querySelector('img[name="goods_l"]').getAttribute('alt');
 
@@ -53,9 +67,12 @@ async function akizuki_copy_details_to_text(type) {
 
 
 function convert_full_width_to_half_width(input) {
-    return input.replace(/[Ａ-Ｚａ-ｚ０-９]/g, function(match) {
+    return input.replace(/[Ａ-Ｚａ-ｚ０-９！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［＼］＾＿｀｛｜｝]/g, function(match) {
         return String.fromCharCode(match.charCodeAt(0) - 0xFEE0);
-    }).replace(/　/g, ' '); // 全角空白を半角空白に変換
+    })
+        .replace(/　/g, ' ')       //全角スペース
+        .replace(/[‐－―]/g, '-')  //ハイフンいくつか
+        .replace(/[～〜]/g, '~');  // チルダいくつか
 }
 
 function copy_to_clipboard(text) {
@@ -142,7 +159,7 @@ function create_notification(message, is_error=false) {
 function set_notification_container() {
     let overlay = document.createElement("div");
     overlay.id = "notification-container";
-    overlay.className = "akizuki_copy_details_to_text";
+    overlay.className = "akizuki_tools";
     document.body.appendChild(overlay);
 
     const css = `
@@ -186,7 +203,7 @@ function set_notification_container() {
             }`;
 
     let styleElement = document.createElement("style");
-    styleElement.className = "akizuki_copy_details_to_text";
+    styleElement.className = "akizuki_tools";
     styleElement.type = "text/css";
     styleElement.appendChild(document.createTextNode(css));
     let head = document.head || document.getElementsByTagName('head')[0];
