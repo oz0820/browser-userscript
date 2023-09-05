@@ -29,6 +29,7 @@
         const iframe = document.querySelector('iframe[class="akizuki_tools"]');
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.querySelector('p').remove();
+        iframeDoc.querySelector('div').removeAttribute('style');
         iframeDoc.querySelector('th[style]').removeAttribute('style');
         iframeDoc.querySelector('table').querySelector('div').setAttribute('style', 'margin: 2px; width: 50px;')
         const table_height = iframeDoc.querySelector('table').clientHeight;
