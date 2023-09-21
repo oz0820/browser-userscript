@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.06.0
+// @version         2023.09.22.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/*
@@ -13,12 +13,31 @@
 (function() {
     set_notification_container();
 
+    if (!document.querySelector('h6')) {
+        console.log('item not found.');
+        let insert_html = `<table class="notice_">
+    <tbody><tr>
+      <td>
+        <p style="text-align: center;"><a href="https://web.archive.org/web/*/${location.href}" target="_blank">Web Archiveへ</a></p><a href="https://web.archive.org/web/*/${location.href}" target="_blank">
+      </a></td>
+    </tr>
+  </tbody>
+</table>`
+        document.querySelector('td.mainframe_ > table').insertAdjacentHTML('afterend', insert_html);
+
+        return;
+    }
+
     const item_id = document.querySelector('img[name="goods_l"]').src.split('/')[6].split('.')[0];
     const html =
-        `<div class="akizuki_tools">
+        `<div class="akizuki_tools" id="akizuki_tools">
             <div style="margin: 3px">
                 <button class="akizuki_tools" data-type="title">製品名</button>
                 <button class="akizuki_tools" data-type="description">詳細</button>
+                <select name="akizuki_store_select" id="akizuki_store_select" style="margin: 3px;">
+                    <option value="yashio">八潮店</option>
+                    <option value="akihabara">秋葉原店</option>
+                </select>
             </div>
             <iframe class="akizuki_tools" src="https://akizukidenshi.com/catalog/goods/warehouseinfo.aspx?goods=${item_id}" scrolling="no"></iframe>
         </div>`
@@ -59,6 +78,18 @@ async function akizuki_tools(type) {
         const item_id = document.querySelector('img[name="goods_l"]').src.split('/')[6].split('.')[0];
         const sales_floor = await get_sales_floor(item_id);
         const item_url = document.location.href;
+
+        switch (document.querySelector('select[name="akizuki_store_select"]').value) {
+            case "yashio":
+                console.log('yashio');
+                break
+            case 'akihabara':
+                console.log('akihabara');
+                break
+            default:
+                console.log('akihabara');
+        }
+
 
         const out = `${item_id}\n${sales_floor}\n${item_url}`;
         copy_to_clipboard(out);
@@ -127,6 +158,29 @@ function copy_to_clipboard(text) {
     textarea.select();
     document.execCommand('copy');
     document.body.removeChild(textarea);
+}
+
+
+function set_store(store) {
+    const date = new Date();
+    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = 'akizuki_tools_store' + "=" + store + "; " + expires + "; path=/";
+}
+
+function get_store() {
+    const cookieName = "akizuki_tools_store=";
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i];
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(cookieName) === 0) {
+            return cookie.substring(cookieName.length, cookie.length);
+        }
+    }
+    return null; // Cookieが見つからない場合
 }
 
 
