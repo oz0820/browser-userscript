@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.22.1
+// @version         2023.09.22.2
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -44,6 +44,10 @@
 
     document.querySelector('div[class="detail_stocktitle_"]').insertAdjacentHTML('afterend', html);
 
+    // デフォルトの店舗を変更する
+    const store_number = get_store() === 'yashio' ? 0 : get_store() === 'akihabara' ? 1 : 1;
+    document.querySelector('select[id="akizuki_store_select"]').selectedIndex = store_number;
+
     document.querySelector('iframe[class="akizuki_tools"]').onload = () => {
         const iframe = document.querySelector('iframe[class="akizuki_tools"]');
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -69,6 +73,10 @@
 
 
 async function akizuki_tools(type) {
+
+    let store = document.querySelector('select[id="akizuki_store_select"]').value;
+    set_store(store);
+
     if ("title" === type) {
         const item_name = document.querySelector('img[name="goods_l"]').getAttribute('alt');
 
@@ -94,7 +102,7 @@ async function akizuki_tools(type) {
         const out = `${item_id}\n${sales_floor}\n${item_url}`;
         copy_to_clipboard(out);
     }
-    create_notification('コピーされました');
+    create_notification('コピーしました');
 }
 
 function convert_full_width_to_half_width(input) {
@@ -106,13 +114,16 @@ function convert_full_width_to_half_width(input) {
         .replace(/[～〜]/g, '~');
 }
 
+
 async function get_sales_floor(item_id) {
     const iframe = document.querySelector('iframe[class="akizuki_tools"]');
     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
+    const store = get_store();
+    const store_select_num = store === 'yashio' ? 2 : store === 'akihabara' ? 3 : 3;
     // 埋め込んだiframe内から読み出し
     try {
-        return iframeDoc.querySelector('#detail_stockinfo > table > tbody > tr:nth-child(3) > td.storelist_.textleft_ > div').textContent.trim();
+        return iframeDoc.querySelector(`#detail_stockinfo > table > tbody > tr:nth-child(${store_select_num}) > td.storelist_.textleft_ > div`).textContent.trim();
 
     // 失敗したら、ページをfetchして取り出す。
     } catch (e) {
@@ -138,7 +149,7 @@ async function get_sales_floor(item_id) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
 
-            return doc.querySelector('#detail_stockinfo > table > tbody > tr:nth-child(3) > td.storelist_.textleft_ > div').textContent.trim();
+            return doc.querySelector(`#detail_stockinfo > table > tbody > tr:nth-child(${store_select_num}) > td.storelist_.textleft_ > div`).textContent.trim();
 
         } catch (error) {
             console.error('Error:', e.message);
@@ -180,7 +191,10 @@ function get_store() {
             return cookie.substring(cookieName.length, cookie.length);
         }
     }
-    return null; // Cookieが見つからない場合
+
+    // Cookieが見つからない場合
+    set_store('akihabara');
+    return 'alohabara';
 }
 
 
