@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Youtube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.25.0
+// @version         2023.09.25.1
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -48,7 +48,6 @@
             return;
         }
 
-        console.log('window.onload', document.querySelectorAll('[id="channel-handle"]').length);
         // 念のため削除
         document.querySelectorAll('.yt_og_chanel_id').forEach((elm) => {
             elm.remove();
@@ -113,7 +112,7 @@
     async function get_og_cid() {
         try {
             const response = await fetch(location.href);
-            console.log(response.url);
+            // console.log(response.url);
             const html = await response.text();
 
             const parser = new DOMParser();
