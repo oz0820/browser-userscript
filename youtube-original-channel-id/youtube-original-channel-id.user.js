@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Youtube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.26.0
+// @version         2023.09.26.1
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -18,7 +18,7 @@
         if (href !== window.location.href) {
             href = window.location.href;
 
-            if (!href.split('/')[3].startsWith('@')) {
+            if (!href.split('/')[3].startsWith('@') && !(href.split('/')[3] === 'channel')) {
                 return;
             }
 
@@ -30,8 +30,8 @@
     })
     observer.observe(document, { childList: true, subtree: true });
 
-    // ハンドルを使ったチャンネルページのみ実行する
-    if (!window.location.href.split('/')[3].startsWith('@')) {
+    // チャンネルページのみ実行する
+    if (!href.split('/')[3].startsWith('@') && !(href.split('/')[3] === 'channel')) {
         return;
     }
 
@@ -153,7 +153,7 @@
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
         .then(() => {
-            console.log("テキストがクリップボードにコピーされました");
+            console.log("テキストがクリップボードにコピーされました: ", text);
         })
         .catch(err => {
             console.error("クリップボードへのアクセスに失敗しました:", err);
