@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Youtube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.25.1
+// @version         2023.09.26.0
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -57,16 +57,19 @@
 <yt-formatted-string id="channel-id" class="delimiter style-scope ytd-c4-tabbed-header-renderer">cannot_get_channel_id</yt-formatted-string>
 <button value="change" class="yt_og_chanel_id" id="change_button" style="padding-top: 0; padding-bottom: 0; margin-left: 10px;">change</button>`;
 
+        // チャンネルのハンドルを表示する要素の後ろに ex_html を挿入する
         document.querySelectorAll('[id="channel-handle"]').forEach((elm) => {
             elm.insertAdjacentHTML('afterend', ex_html);
         });
 
+        // 追加したボタンに操作用のEventListenerを追加
         document.querySelectorAll('#change_button.yt_og_chanel_id').forEach((elm) => {
             elm.addEventListener('click', function () {
                 yt_og_cid();
             })
         })
 
+        // 要素をねじ込むと勝手に is-empty が挿入されるので削除する
         document.querySelectorAll('yt-formatted-string[id="channel-id"]').forEach((elm) => {
             elm.innerHTML = cid;
             elm.removeAttribute('is-empty');
@@ -80,6 +83,20 @@
         document.querySelectorAll('yt-formatted-string#channel-id').forEach((elm) => {
             elm.classList.add('delimiter');
         })
+
+        // ハンドル・チャンネルIDをクリックしたらコピーする
+        document.querySelectorAll('yt-formatted-string#channel-handle').forEach(elm => {
+            elm.addEventListener('click', function (e) {
+                copyToClipboard(e.target.innerHTML)
+            });
+        });
+        document.querySelectorAll('yt-formatted-string#channel-id').forEach(elm => {
+            elm.addEventListener('click', function (e) {
+                copyToClipboard(e.target.innerHTML)
+            });
+        });
+
+
     }
 
 
@@ -131,4 +148,17 @@
     }
 
 })();
+
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            console.log("テキストがクリップボードにコピーされました");
+        })
+        .catch(err => {
+            console.error("クリップボードへのアクセスに失敗しました:", err);
+            alert("クリップボードへのアクセスに失敗しました\n" + err)
+        });
+}
+
 
