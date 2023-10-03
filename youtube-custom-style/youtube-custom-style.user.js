@@ -11,6 +11,24 @@
 
 (function() {
 
+
+    // ページ移動を検出します
+    let href = window.location.href;
+    const observer = new MutationObserver(async function () {
+        if (href !== window.location.href) {
+            href = window.location.href;
+
+            if (location.href.startsWith('https://www.youtube.com/watch')) {
+                title_font_replace();
+            }
+
+        }
+    })
+    observer.observe(document, { childList: true, subtree: true });
+
+    if (!location.href.startsWith('https://www.youtube.com/watch')) {
+        return;
+    }
     // 動画タイトルのフォントが重すぎてイヤなので、過去のスタイルに戻す
     `
     h1.ytd-watch-metadata {
@@ -33,25 +51,20 @@
     const sleep = ms => new Promise(res => setTimeout(res, ms))
     // タイトルを読み込むまで良い感じにループしながら待機する
     async function title_font_replace() {
-        for (let i=0; i<30; i++) {
-            try {
-                let target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
-                target_elm.style = 'font-size: 18px; font-weight: 400;';
-                return;
-            } catch(e) {
-                // エラーが起きて当然なのでcatchは握りつぶします
-            }
+        let target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
+        while (!target_elm) {
             await sleep(100);
+            target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
         }
+        target_elm.style = 'font-size: 18px; font-weight: 400;';
     }
-
     title_font_replace();
 
 
     // ダークテーマの背景を真っ黒にする
     const before_style = document.querySelector('style[css-build-single]').textContent;
-    const after_sytle = before_style.replaceAll('--yt-spec-base-background: #0f0f0f', '--yt-spec-base-background: #000000');
-    document.querySelector('style[css-build-single]').textContent = after_sytle;
+    const after_style = before_style.replaceAll('--yt-spec-base-background: #0f0f0f', '--yt-spec-base-background: #000000');
+    document.querySelector('style[css-build-single]').textContent = after_style;
 
 
 
