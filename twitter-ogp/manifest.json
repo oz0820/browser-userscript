@@ -1,10 +1,10 @@
 {
   "name": "twitter-OGP",
-  "version": "2023.10.05.0",
+  "version": "2023.10.05.1",
   "manifest_version": 3,
   "description": "TwitterのOGPタイトルなどを復活させます",
   "content_scripts": [{
-    "matches": ["https://twitter.com/*"],
+    "matches": ["https://twitter.com/*", "https://tweetdeck.twitter.com/*"],
     "js": [
       "twitter-ogp.user.js"
     ]
