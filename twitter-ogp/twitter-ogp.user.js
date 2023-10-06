@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.10.05.2
+// @version         2023.10.06.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -22,26 +22,25 @@
 
 
     function add_ogp_twitter() {
-        document.querySelector('div[data-testid="primaryColumn"]')
-            .querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
+        document.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
 
-                // 既に処理した要素は飛ばす
-                if (elm.getAttribute('ogp') !== null) {
-                    return;
-                }
-                // 別のタグが紛れ込むことがあったり無かったり……
-                if (!elm.getAttribute('href').startsWith('https://t.co/')) {
-                    return;
-                }
+            // 既に処理した要素は飛ばす
+            if (elm.getAttribute('ogp') !== null) {
+                return;
+            }
+            // 別のタグが紛れ込むことがあったり無かったり……
+            if (!elm.getAttribute('href').startsWith('https://t.co/')) {
+                return;
+            }
 
-                // 表示モードごとに色を変える
-                let color = get_text_color();
+            // 表示モードごとに色を変える
+            let color = get_text_color();
 
-                let href = elm.getAttribute('href');
-                let fqdn = elm.querySelector('span').innerText;
-                let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
+            let href = elm.getAttribute('href');
+            let fqdn = elm.querySelector('span').innerText;
+            let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
 
-                const insert_html =
+            const insert_html =
 `<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-4rbku5 css-18t94o4 css-1dbjc4n r-1loqt21 r-18u37iz r-16y2uox r-1wtj0ep r-1ny4l3l r-o7ynqc r-6416eg">
     <div class="css-1dbjc4n r-16y2uox r-1wbh5a2 r-z5qs1h r-1777fci r-kzbkwu r-1e081e0 r-ttdzmv" data-testid="card.layoutLarge.detail">
         <div dir="auto" class="css-901oao css-1hf3ou5 r-14j79pv r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.fqdn}">
@@ -53,16 +52,16 @@
     </div>
 </a>`
 
-                // 元々タイトルなどが埋め込まれていた場所はここらしい
-                elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
+            // 元々タイトルなどが埋め込まれていた場所はここらしい
+            elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
 
-                // 画像内のfqdnを削除
-                elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
+            // 画像内のfqdnを削除
+            elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
 
-                // 編集済みのフラグ
-                elm.setAttribute('ogp', '');
-                console.log('add OGP', elm);
-            })
+            // 編集済みのフラグ
+            elm.setAttribute('ogp', '');
+            console.log('add OGP', elm);
+        })
     }
 
 
