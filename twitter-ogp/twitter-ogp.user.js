@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.10.06.0
+// @version         2023.10.10.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -55,6 +55,9 @@
             // 元々タイトルなどが埋め込まれていた場所はここらしい
             elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
 
+            // スタイルが変わってpaddingが効かなくなったので追加
+            elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
+
             // 画像内のfqdnを削除
             // elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
 
@@ -95,6 +98,9 @@
 </a>`
                 // 元々タイトルなどが埋め込まれていた場所はここらしい
                 elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
+
+                // スタイルが変わってpaddingが効かなくなったので追加
+                elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
 
                 // 編集済みのフラグ
                 elm.setAttribute('ogp', '');
