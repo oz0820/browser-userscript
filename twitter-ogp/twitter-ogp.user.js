@@ -56,7 +56,7 @@
             elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
 
             // 画像内のfqdnを削除
-            elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
+            // elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
 
             // 編集済みのフラグ
             elm.setAttribute('ogp', '');
