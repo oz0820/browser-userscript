@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.10.10.1
+// @version         2023.10.11.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -23,54 +23,7 @@
 
     function add_ogp_twitter() {
         document.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
-
-            // 既に処理した要素は飛ばす
-            if (elm.getAttribute('ogp') !== null) {
-                return;
-            }
-            // 別のタグが紛れ込むことがあったり無かったり……
-            if (!elm.getAttribute('href').startsWith('https://t.co/')) {
-                return;
-            }
-
-            // 表示モードごとに色を変える
-            let color = get_text_color();
-
-            let href = elm.getAttribute('href');
-            let fqdn = elm.querySelector('span').innerText;
-            let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
-
-            const insert_html =
-`<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-4rbku5 css-18t94o4 css-1dbjc4n r-1loqt21 r-18u37iz r-16y2uox r-1wtj0ep r-1ny4l3l r-o7ynqc r-6416eg">
-    <div class="css-1dbjc4n r-16y2uox r-1wbh5a2 r-z5qs1h r-1777fci" data-testid="card.layoutLarge.detail">
-        <div dir="auto" class="css-901oao css-1hf3ou5 r-14j79pv r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.fqdn}">
-            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${fqdn}</span>
-        </div>
-        <div dir="auto" class="css-901oao css-1hf3ou5 r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.title}">
-            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0" ">${aria_label}</span>
-        </div>
-    </div>
-</a>`
-
-            // 元々タイトルなどが埋め込まれていた場所はここらしい
-            elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
-
-            // スタイルが変わってpaddingが効かなくなったので追加
-            elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
-
-            // 画像内のfqdnを削除
-            // elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
-
-            // 編集済みのフラグ
-            elm.setAttribute('ogp', '');
-            console.log('add OGP', elm);
-        })
-    }
-
-
-    function add_ogp_tweetdeck() {
-        document.querySelector('div[class="css-1dbjc4n r-18u37iz r-16y2uox"]').querySelectorAll('div[class="css-1dbjc4n r-cpa5s6"]').forEach(column => {
-            column.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
+            try {
 
                 // 既に処理した要素は飛ばす
                 if (elm.getAttribute('ogp') !== null) {
@@ -78,6 +31,11 @@
                 }
                 // 別のタグが紛れ込むことがあったり無かったり……
                 if (!elm.getAttribute('href').startsWith('https://t.co/')) {
+                    return;
+                }
+
+                // 広告のhrefにはクエリが付いているので除外
+                if (elm.getAttribute('href').indexOf('?') !== -1) {
                     return;
                 }
 
@@ -91,20 +49,81 @@
                 const insert_html =
 `<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-4rbku5 css-18t94o4 css-1dbjc4n r-1loqt21 r-18u37iz r-16y2uox r-1wtj0ep r-1ny4l3l r-o7ynqc r-6416eg">
     <div class="css-1dbjc4n r-16y2uox r-1wbh5a2 r-z5qs1h r-1777fci" data-testid="card.layoutLarge.detail">
+        <div dir="auto" class="css-901oao css-1hf3ou5 r-14j79pv r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.fqdn}">
+            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0">${fqdn}</span>
+        </div>
         <div dir="auto" class="css-901oao css-1hf3ou5 r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.title}">
             <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0" ">${aria_label}</span>
         </div>
     </div>
 </a>`
+
                 // 元々タイトルなどが埋め込まれていた場所はここらしい
                 elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
 
                 // スタイルが変わってpaddingが効かなくなったので追加
                 elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
 
+                // 画像内のfqdnを削除
+                // elm.querySelectorAll('div.css-1dbjc4n.r-rki7wi.r-161ttwi.r-u8s1d').forEach(del_elm => {del_elm.remove();});
+
                 // 編集済みのフラグ
                 elm.setAttribute('ogp', '');
                 console.log('add OGP', elm);
+
+            } catch (e) {
+                // 一度エラーなら二度目もエラーなので、対象外に指定する
+                console.log('error OGP', e, elm);
+                elm.setAttribute('ogp', '');
+            }
+        })
+    }
+
+
+    function add_ogp_tweetdeck() {
+        document.querySelector('div[class="css-1dbjc4n r-18u37iz r-16y2uox"]').querySelectorAll('div[class="css-1dbjc4n r-cpa5s6"]').forEach(column => {
+            column.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
+                try {
+
+                    // 既に処理した要素は飛ばす
+                    if (elm.getAttribute('ogp') !== null) {
+                        return;
+                    }
+                    // 別のタグが紛れ込むことがあったり無かったり……
+                    if (!elm.getAttribute('href').startsWith('https://t.co/')) {
+                        return;
+                    }
+
+                    // 表示モードごとに色を変える
+                    let color = get_text_color();
+
+                    let href = elm.getAttribute('href');
+                    let fqdn = elm.querySelector('span').innerText;
+                    let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
+
+                    const insert_html =
+`<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-4rbku5 css-18t94o4 css-1dbjc4n r-1loqt21 r-18u37iz r-16y2uox r-1wtj0ep r-1ny4l3l r-o7ynqc r-6416eg">
+    <div class="css-1dbjc4n r-16y2uox r-1wbh5a2 r-z5qs1h r-1777fci" data-testid="card.layoutLarge.detail">
+        <div dir="auto" class="css-901oao css-1hf3ou5 r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.title}">
+            <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0" ">${aria_label}</span>
+        </div>
+    </div>
+</a>`
+                    // 元々タイトルなどが埋め込まれていた場所はここらしい
+                    elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
+
+                    // スタイルが変わってpaddingが効かなくなったので追加
+                    elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
+
+                    // 編集済みのフラグ
+                    elm.setAttribute('ogp', '');
+                    console.log('add OGP', elm);
+
+                } catch (e) {
+                    // 一度エラーなら二度目もエラーなので、対象外に指定する
+                    console.log('error OGP', e, elm);
+                    elm.setAttribute('ogp', '');
+                }
             })
 
         })
