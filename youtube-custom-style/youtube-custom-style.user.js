@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.10.03.0
+// @version      2023.10.18.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -11,12 +11,15 @@
 
 (function() {
 
-
     // ページ移動を検出します
     let href = window.location.href;
     const observer = new MutationObserver(async function () {
         if (href !== window.location.href) {
             href = window.location.href;
+
+            if (location.href.startsWith('https://www.youtube.com/')) {
+                replace_special_logo();
+            }
 
             if (location.href.startsWith('https://www.youtube.com/watch')) {
                 title_font_replace();
@@ -26,9 +29,16 @@
     })
     observer.observe(document, { childList: true, subtree: true });
 
-    if (!location.href.startsWith('https://www.youtube.com/watch')) {
-        return;
+    // 初回実行
+    background_color_changer();
+    replace_special_logo();
+
+    if (location.href.startsWith('https://www.youtube.com/watch')) {
+        title_font_replace();
     }
+
+
+
     // 動画タイトルのフォントが重すぎてイヤなので、過去のスタイルに戻す
     `
     h1.ytd-watch-metadata {
@@ -58,13 +68,24 @@
         }
         target_elm.style = 'font-size: 18px; font-weight: 400;';
     }
-    title_font_replace();
 
+    function replace_special_logo() {
+        window.onload = () => {
+            document.querySelectorAll('a#logo.ytd-topbar-logo-renderer').forEach(elm => {
+                elm.href = '/';
+            });
+            document.querySelectorAll('#big-yoodle').forEach(elm => {
+                elm.remove();
+            })
+        }
+    }
 
     // ダークテーマの背景を真っ黒にする
-    const before_style = document.querySelector('style[css-build-single]').textContent;
-    const after_style = before_style.replaceAll('--yt-spec-base-background: #0f0f0f', '--yt-spec-base-background: #000000');
-    document.querySelector('style[css-build-single]').textContent = after_style;
+    function background_color_changer() {
+        const before_style = document.querySelector('style[css-build-single]').textContent;
+        const after_style = before_style.replaceAll('--yt-spec-base-background: #0f0f0f', '--yt-spec-base-background: #000000');
+        document.querySelector('style[css-build-single]').textContent = after_style;
+    }
 
 
 
