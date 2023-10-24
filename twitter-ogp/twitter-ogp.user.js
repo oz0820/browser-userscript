@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.10.11.0
+// @version         2023.10.24.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -30,7 +30,8 @@
                     return;
                 }
                 // 別のタグが紛れ込むことがあったり無かったり……
-                if (!elm.getAttribute('href').startsWith('https://t.co/')) {
+                if (!elm.getAttribute('href').startsWith('https://t.co/') &&
+                    !elm.getAttribute('href').startsWith('https://youtu.be/')) {
                     return;
                 }
 
