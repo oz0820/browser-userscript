@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name            Youtube original channel id
+// @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
 // @version         2023.09.30.1
 // @description     YoutubeのチャンネルIDを表示する機能を追加します

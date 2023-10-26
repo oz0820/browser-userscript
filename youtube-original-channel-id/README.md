@@ -1,4 +1,4 @@
-# Youtube original channel id
+# YouTube original channel id
 
 YoutubeのチャンネルページにチャネルIDを表示するボタンを追加します。
 
