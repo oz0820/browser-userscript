@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.30.1
+// @version         2023.10.27.0
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -54,8 +54,9 @@
         });
 
         const ex_html = `
-<yt-formatted-string id="channel-id" class="delimiter style-scope ytd-c4-tabbed-header-renderer yt_og_chanel_id" style="font-weight: 500;">cannot_get_channel_id</yt-formatted-string>
-<button value="change" class="yt_og_chanel_id" id="change_button" style="padding-top: 0; padding-bottom: 0; margin-left: 10px;">change</button>`;
+<yt-formatted-string id="channel-id" class="style-scope ytd-c4-tabbed-header-renderer yt_og_chanel_id" style="font-weight: 500;">cannot_get_channel_id</yt-formatted-string>
+<button value="change" class="yt_og_chanel_id" id="member_list" style="padding-top: 0; padding-bottom: 0; margin-left: 10px;">Member list</button>`;
+
 
         // チャンネルのハンドルを表示する要素の後ろに ex_html を挿入する
         document.querySelectorAll('[id="channel-handle"]').forEach((elm) => {
@@ -63,9 +64,9 @@
         });
 
         // 追加したボタンに操作用のEventListenerを追加
-        document.querySelectorAll('#change_button.yt_og_chanel_id').forEach((elm) => {
+        document.querySelectorAll('#member_list.yt_og_chanel_id').forEach((elm) => {
             elm.addEventListener('click', function () {
-                yt_og_cid();
+                yt_open_member_list();
             })
         })
 
@@ -74,15 +75,6 @@
             elm.innerHTML = cid;
             elm.removeAttribute('is-empty');
         });
-
-        // ハンドルを表示にして
-        document.querySelectorAll('yt-formatted-string#channel-handle.delimiter').forEach((elm) => {
-            elm.classList.remove('delimiter');
-        })
-        // cidを非表示にする
-        document.querySelectorAll('yt-formatted-string#channel-id').forEach((elm) => {
-            elm.classList.add('delimiter');
-        })
 
         // ハンドル・チャンネルIDをクリックしたらコピーする
         document.querySelectorAll('yt-formatted-string#channel-handle').forEach(elm => {
@@ -95,34 +87,12 @@
                 copyToClipboard(e.target.innerHTML)
             });
         });
-
-
     }
 
 
-    function yt_og_cid() {
-
-        // ハンドルが非表示にされていたら
-        if (document.querySelector('yt-formatted-string#channel-handle.delimiter')) {
-            // ハンドルを表示にして
-            document.querySelectorAll('yt-formatted-string#channel-handle.delimiter').forEach((elm) => {
-                elm.classList.remove('delimiter');
-            })
-            // cidを非表示にする
-            document.querySelectorAll('yt-formatted-string#channel-id').forEach((elm) => {
-                elm.classList.add('delimiter');
-            })
-
-        } else {
-            // ハンドルを非表示にして
-            document.querySelectorAll('yt-formatted-string#channel-handle').forEach((elm) => {
-                elm.classList.add('delimiter');
-            })
-            // cidを表示する
-            document.querySelectorAll('yt-formatted-string#channel-id.delimiter').forEach((elm) => {
-                elm.classList.remove('delimiter');
-            })
-        }
+    function yt_open_member_list() {
+        const member_ship_list = 'https://www.youtube.com/playlist?list=UUMO' + document.querySelector('yt-formatted-string#channel-id').innerText.slice(2)
+        window.open(member_ship_list, '_blank')
     }
 
 
