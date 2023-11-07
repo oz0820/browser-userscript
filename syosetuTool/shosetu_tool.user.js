@@ -62,37 +62,6 @@
                 // console.log(e.key);
             }
         });
-
-
-        function total_characters() {
-            let strhtml = '<html>' + document.getElementById('novel_honbun').innerHTML.replaceAll("\n", "") + '</html>';
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(strhtml, 'text/html');
-
-            let lines = doc.getElementsByTagName('p');
-
-            let total_count = 0;
-            for (let i=0; i<lines.length; i++) {
-                let line_str = lines[i].innerHTML;
-                // 行brタグだけのことがある
-                if (line_str === "<br>") {
-                    continue;
-                }
-
-                // ルビがあったらルビの文字数を逐次足して、line_strからルビを消し去る
-                while (line_str.search("<ruby>") !== -1) {
-                    // ルビ前
-                    total_count += line_str.substring(0, line_str.search("<ruby>")).length;
-                    let ruby_body = line_str.substring(line_str.search("<ruby>") + 6, line_str.search("</ruby>"));
-                    // ルビ
-                    total_count += ruby_body.substring(ruby_body.search("<rb>") + 4, ruby_body.search("</rb>")).length;
-                    // ルビ後に置き換え
-                    line_str = line_str.substring(line_str.search("</ruby>")+7);
-                }
-                total_count += lines[i].innerHTML.length;
-            }
-            return total_count;
-        }
     }
 
 
