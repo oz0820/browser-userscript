@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.08.23.1
+// @version      2023.11.07.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -15,48 +15,58 @@
 
     function syosetu() {
         document.addEventListener('keydown', function(e) {
-            let ncode = document.location.href.split("/")[3];
-            let next = "https://ncode.syosetu.com/"+ncode+"/";
-            let novel_no = document.getElementById("novel_no");
+            const ncode = document.location.href.split("/")[3];
+            const novel_no = document.querySelector("div#novel_no");
 
             // 一覧ページとかで発動されると困るので
             if (novel_no == null) {
                 return;
             }
 
-            let total_episode = parseInt(novel_no.innerHTML.split("/")[1]);
-            let now_episode = parseInt(novel_no.innerHTML.split("/")[0]);
+            // 移動ボタンを取得する
+            let before_button, after_button;
+            if (document.querySelector('div.novel_bn').children.length === 2) {
+                before_button = document.querySelector('div.novel_bn > a:nth-child(1)');
+                after_button = document.querySelector('div.novel_bn > a:nth-child(2)');
+            } else {
+                if (document.querySelector('div.novel_bn > a:nth-child(1)').innerText.search('<') !== -1) {
+                    before_button = document.querySelector('div.novel_bn > a:nth-child(1)');
+                    after_button = null;
+                } else {
+                    before_button = null;
+                    after_button = document.querySelector('div.novel_bn > a:nth-child(1)');
+                }
+            }
 
-            let siori_url = document.getElementsByName("siori_url");
-
+            // 次のページに進む
             if (e.code === "ControlRight" || e.code === "ControlLeft") {
-                // 範囲外ページに移動することを防ぐ
-                if (now_episode === total_episode) {
-                    return;
+                if (after_button) {
+                    after_button.click();
                 }
-                next += now_episode+1;
-                location.assign(next);
+
+            // 次のページに進む
             } else if (e.code === "ArrowRight") {
-                // 範囲外ページに移動することを防ぐ
-                if (now_episode === total_episode) {
-                    return;
+                if (after_button) {
+                    after_button.click();
                 }
-                next += now_episode+1;
-                location.assign(next);
+
+            // 前のページに進む
             } else if (e.code === "ArrowLeft") {
-                // 範囲外のページに移動することを防ぐ
-                if (now_episode <= 1) {
-                    return;
+                if (before_button) {
+                    before_button.click();
                 }
-                next += now_episode-1;
-                document.location.href = next;
+
+            // 高速スクロールしたい
             } else if (e.code === "ArrowUp") {
                 window.scroll(window.scrollX, window.scrollY-100);
             } else if (e.code === "ArrowDown") {
                 window.scroll(window.scrollX, window.scrollY+100);
+
+            // しおりをクリック
             } else if (e.code === "ShiftRight") {
-                if (siori_url.length > 0) {
-                    siori_url[0].click();
+                if (document.querySelector('li.bookmark_now.set_siori')) {
+                    const siori_button = document.querySelector('input[name="siori_url"]');
+                    siori_button.click();
                 }
             } else {
                 // console.log(e.key);
