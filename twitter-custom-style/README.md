@@ -7,5 +7,5 @@ Twitterにオレオレスタイルを適用します．
 
 ### インストール
 - [tampermonkey](https://www.tampermonkey.net/)とかユーザースクリプトを実行できる拡張機能をインスコする。
-- [ここ](https://github.com/oz0820/browser-userscript/raw/main/twitter-ogp/twitter-ogp.user.js)(このプロジェクトの最新コード)押す。
+- [ここ](https://github.com/oz0820/browser-userscript/raw/main/twitter-custom-style/twitter-custom-style.user.js)(このプロジェクトの最新コード)押す。
 - 指示に従ってインストール。
