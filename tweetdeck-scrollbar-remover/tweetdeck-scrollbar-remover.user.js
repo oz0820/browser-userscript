@@ -10,15 +10,6 @@
 // ==/UserScript==
 
 (function() {
-    const deck_ver = document.cookie
-        .split(';')
-        .find(row => row.trim().startsWith('tweetdeck_version'))
-        .split('=')[1];
-
-    if (deck_ver !== 'beta') {
-        console.log('[TweetDeck Scrollbar Remover] The version of Tweetdeck does not match.');
-        return;
-    }
     // CSSを文字列として定義
     const css = `
 /* カラムのタグ */
