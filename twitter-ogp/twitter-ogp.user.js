@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.10.24.0
+// @version         2023.11.14.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -82,7 +82,7 @@
 
 
     function add_ogp_tweetdeck() {
-        document.querySelector('div[class="css-1dbjc4n r-18u37iz r-16y2uox"]').querySelectorAll('div[class="css-1dbjc4n r-cpa5s6"]').forEach(column => {
+        const deck_work = (column) => {
             column.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
                 try {
 
@@ -126,8 +126,15 @@
                     elm.setAttribute('ogp', '');
                 }
             })
+        }
 
-        })
+        // 画像などを拡大表示したときのツイートとリプライ
+        document.querySelectorAll('div[class="css-1dbjc4n r-kemksi r-1kqtdi0 r-1ljd8xs r-1phboty r-1dqxon3 r-1hycxz"]')
+            .forEach(column => deck_work(column));
+        // deck本体のカラム
+        document.querySelector('div[class="css-1dbjc4n r-18u37iz r-16y2uox"]')
+            .querySelectorAll('div[class="css-1dbjc4n r-cpa5s6"]')
+            .forEach(column => deck_work(column));
     }
 
     function get_text_color() {
