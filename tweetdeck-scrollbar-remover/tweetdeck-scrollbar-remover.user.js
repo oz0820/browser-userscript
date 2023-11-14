@@ -70,25 +70,4 @@
                 }
             })
     })
-
-
-    // 待機後に監視を開始
-    wait(10000).then(function() {
-
-        // 指定されたクラス名の要素を取得
-        let column_header = document.querySelectorAll('.css-1dbjc4n.r-gtdqiz.r-ipm5af.r-136ojw6');
-
-        // 横スクロールを適用するelements
-        let target_window = document.getElementsByClassName('css-1dbjc4n r-h2r02b r-18u37iz r-16y2uox r-lltvgl r-1imtxzf r-13qz1uu')[0];
-
-        // ホイールイベントを追加
-        column_header.forEach(function (element) {
-            element.addEventListener('wheel', function (event) {
-                // スクロールの値を取得
-                let scrollValue = event.deltaY;
-                // 横スクロール実行
-                target_window.scrollLeft += scrollValue;
-            });
-        });
-    });
 })();
