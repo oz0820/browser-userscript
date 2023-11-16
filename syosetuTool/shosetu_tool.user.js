@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.16.2
+// @version      2023.11.16.3
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -19,7 +19,7 @@
             const novel_no = document.querySelector("div#novel_no");
 
             // 一覧ページとかで発動されると困るので
-            if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d{4}[a-z]{2}\/\d+/)) {
+            if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
                 return;
             }
 
@@ -76,10 +76,10 @@
 
          /*小説の詳細を表示するやつ*/
 
-        if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d{4}[a-z]{2}\/\d+/)) {
+        if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
             return;
         }
-        if (location.href.match(/https:\/\/ncode.syosetu.com\/n\d{4}[a-z]{2}\/\d+/)[0] + '/' !== location.href) {
+        if (location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)[0] + '/' !== location.href) {
             return;
         }
 
