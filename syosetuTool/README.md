@@ -3,6 +3,8 @@
 小説家になろうをキーボードだけで読むためのツール。  
 ノベルピアにも一部対応(ページ送り機能)
 
+なろうにて，ページをスクロールしても追従する小説情報を表示する
+
 ### インストール
 - [tampermonkey](https://www.tampermonkey.net/)とかユーザースクリプトを実行できる拡張機能をインスコする。  
 - [ここ](https://github.com/oz0820/browser-userscript/raw/main/syosetuTool/shosetu_tool.user.js)(このプロジェクトの最新コード)押す。  
