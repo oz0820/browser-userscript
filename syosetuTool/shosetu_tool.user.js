@@ -19,7 +19,7 @@
             const novel_no = document.querySelector("div#novel_no");
 
             // 一覧ページとかで発動されると困るので
-            if (novel_no == null) {
+            if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d{4}[a-z]{2}\/\d+/)) {
                 return;
             }
 
