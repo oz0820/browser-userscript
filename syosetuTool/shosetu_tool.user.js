@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.16.0
+// @version      2023.11.16.1
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -147,8 +147,8 @@ p.us_novel_no {
                 const long_update = elm.querySelector('.long_update').textContent.trim()
                     .match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0];
 
-                const revision_update = elm.querySelector('span') ?
-                    elm.querySelector('span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
+                const revision_update = elm.querySelector('dt > span') ?
+                    elm.querySelector('dt > span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
                     null;
 
                 return {
