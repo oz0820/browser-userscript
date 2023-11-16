@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.10.19.0
+// @version      2023.11.17.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -32,6 +32,14 @@
     // 初回実行
     background_color_changer();
     replace_special_logo();
+
+    // ライブチャットのハートマークが邪魔なので
+    const add_elm =
+`<style>
+yt-reaction-control-panel-view-model { margin-bottom: 50px; opacity: 0.4; }
+yt-reaction-control-panel-view-model:hover { opacity: 1.0; }
+</style>`;
+    document.head.insertAdjacentHTML('beforeend', add_elm);
 
     if (location.href.startsWith('https://www.youtube.com/watch')) {
         title_font_replace();
