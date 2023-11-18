@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.16.3
+// @version      2023.11.18.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -12,6 +12,118 @@
 // ==/UserScript==
 
 (function() {
+    const novel_data_manager = class {
+        async init(ncode) {
+            this.ncode = ncode;
+
+            const db_open_promise = new Promise((resolve, reject) => {
+                this.openRequest = indexedDB.open('syosetu_tool', 1);
+                this.openRequest.onupgradeneeded = (event) => this.__onupgradeneeded(event);
+                this.openRequest.onsuccess = (event) => resolve(event.target.result);
+                this.openRequest.onerror = (event) => this.__onerror(event);
+            })
+
+            try {
+                this.db = await db_open_promise;
+                this.novel_data = await this._get();
+                if (!this.novel_data) {
+                    await this._update();
+                }
+            } catch(error) {
+                console.error("DB connection error: ", error);
+                this.constructor();
+            }
+        }
+
+        async get_epi(episode_number) {
+            const now = Math.floor(new Date().getTime() / 1000);
+            if (!(episode_number in this.novel_data)) {  // 現在表示している話がデータに存在するか
+                await this._update()
+            } else if (now - this.novel_data['_last_update'] > 86400) {  // 前回更新から24時間以内か
+                await this._update();
+            }
+
+            return this.novel_data[episode_number];
+        }
+
+        async _update() {
+            const fetch_url = `https://ncode.syosetu.com/${this.ncode}/`;
+
+            this.novel_data =
+                await fetch(fetch_url)
+                    .then(res => {
+                        return res.text()
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        let novel_data = {};
+
+                        doc.querySelectorAll('div.index_box > dl.novel_sublist2').forEach(elm => {
+
+                            novel_data[elm.querySelector('a').href.split('/')[4]] = {
+                                'novel_no': Number(elm.querySelector('a').href.split('/')[4]),
+                                'novel_no_str': elm.querySelector('a').href.split('/')[4],
+                                'subtitle': elm.querySelector('a').innerText.trim(),
+                                'long_update_str': elm.querySelector('.long_update').textContent.trim()
+                                    .match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0],
+                                'revision_update_str': elm.querySelector('dt > span') ?
+                                    elm.querySelector('dt > span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
+                                    null
+                            }
+                        })
+                        novel_data['_last_update'] = Math.floor(new Date().getTime() / 1000)
+                        novel_data['ncode'] = this.ncode;
+                        return novel_data;
+
+                    })
+                    .catch(error => {
+                        console.error('データの取得に失敗しました', error);
+                        return {'_last_update': 0, 'ncode': this.ncode};
+                    });
+
+            await this._write()
+        }
+
+        async _get() {
+            return new Promise((resolve, reject) => {
+                const object_store = this.db.transaction(['post_date'], 'readonly').objectStore('post_date');
+                const get_req = object_store.get(this.ncode);
+                get_req.onsuccess = (event) => {
+                    resolve(event.target.result);
+                };
+                get_req.onerror = (event) => {
+                    reject(event.target.errorCode);
+                };
+            });
+        }
+
+        _write() {
+            return new Promise((resolve, reject) => {
+                const transaction = this.db.transaction(['post_date'], 'readwrite');
+                const object_store = transaction.objectStore('post_date');
+
+                const add_req = object_store.add(this.novel_data);
+                add_req.onsuccess = (event) => {
+                    resolve();
+                };
+                add_req.onerror = (event) => {
+                    reject(event.target.errorCode);
+                };
+            });
+        }
+
+        __onupgradeneeded(event) {
+            const db = event.target.result;
+            db.createObjectStore('post_date', {keyPath: 'ncode'});
+        }
+
+        __onerror(event) {
+            console.error("DB connection error: ", event.target.errorCode);
+            this.constructor();
+        }
+    }
+
 
     function syosetu() {
         const ncode = document.location.href.split("/")[3];
@@ -144,44 +256,28 @@ p.us_novel_subtitle {
 </div>`
         document.querySelector('div#container').insertAdjacentHTML('beforeend', elm);
 
-
-        const fetch_url = 'https://ncode.syosetu.com' + location.href.match(/\/n\w+\//)[0];
-        fetch(fetch_url)
-            .then(res => {
-                return res.text()
-            })
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const elm = doc.querySelector(`a[href="${location.pathname}"]`).parentElement.parentElement;
-
-                const novel_no = elm.querySelector('a').href.split('/')[4];
-                const subtitle = elm.querySelector('a').innerText;
-
-                const long_update = elm.querySelector('.long_update').textContent.trim()
-                    .match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0];
-
-                const revision_update = elm.querySelector('dt > span') ?
-                    elm.querySelector('dt > span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
-                    null;
-
-                return {
-                    'novel_no': novel_no,
-                    'subtitle': subtitle,
-                    'long_update': long_update,
-                    'revision_update': revision_update
-                }
-
-            })
+        /*
+        const ndm = new novel_data_manager(ncode);
+        ndm.get_epi(episode_number)
             .then(novel_data => {
-                document.querySelector('div.us_flow_novel_detail > .us_long_update').textContent = '投稿：' + novel_data.long_update;
-                if (novel_data.revision_update) {
-                    document.querySelector('div.us_flow_novel_detail > .us_revision_update').textContent = '改稿：' + novel_data.revision_update;
+                document.querySelector('div.us_flow_novel_detail > .us_long_update').textContent = '投稿：' + novel_data.long_update_str;
+                if (novel_data.revision_update_str) {
+                    document.querySelector('div.us_flow_novel_detail > .us_revision_update').textContent = '改稿：' + novel_data.revision_update_str;
                 }
-            })
-            .catch(error => {
-                console.error('データの取得に失敗しました', error);
             });
+         */
+
+        const ndm = new novel_data_manager();
+        ndm.init(ncode)
+            .then(() => {
+                ndm.get_epi(episode_number)
+                    .then(novel_data => {
+                        document.querySelector('div.us_flow_novel_detail > .us_long_update').textContent = '投稿：' + novel_data.long_update_str;
+                        if (novel_data.revision_update_str) {
+                            document.querySelector('div.us_flow_novel_detail > .us_revision_update').textContent = '改稿：' + novel_data.revision_update_str;
+                        }
+                    }).catch(e => console.error(e))
+            })
     }
 
 
