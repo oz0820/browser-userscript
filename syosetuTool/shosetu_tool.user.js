@@ -14,10 +14,10 @@
 (function() {
 
     function syosetu() {
-        document.addEventListener('keydown', function(e) {
-            const ncode = document.location.href.split("/")[3];
-            const novel_no = document.querySelector("div#novel_no");
+        const ncode = document.location.href.split("/")[3];
+        const novel_no = document.querySelector("div#novel_no");
 
+        document.addEventListener('keydown', function(e) {
             // 一覧ページとかで発動されると困るので
             if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
                 return;
@@ -106,26 +106,39 @@ p.us_novel_no {
     color: #999999;
     font-size: 90%;
 }
+p.us_novel_subtitle {
+    font-weight: bold;
+}
 </style>`
         document.head.insertAdjacentHTML('beforeend', style_elm);
 
+        const episode_number = Number(location.href.split('/')[4]);
 
         const novel_title = document.querySelector('div.contents1 > a:nth-child(1)').innerText.trim();
         const novel_page_url = document.querySelector('div.contents1 > a:nth-child(1)').href;
-        const novel_no = document.querySelector('div#novel_no').innerText.trim();
-        const novel_writername = document.querySelector('div.contents1 > a:nth-child(2)').innerText.trim();
-        const novel_writer_url = document.querySelector('div.contents1 > a:nth-child(2)').href;
+        const novel_no_str = document.querySelector('div#novel_no').innerText.trim();
+        const novel_writername = (document.querySelector('div.contents1 > a:nth-child(2)') || {}).innerText?.trim() || (() => {
+            const contents = document.querySelector('div.contents1').innerText.trim();
+            const authorIndex = contents.lastIndexOf('作者：');
+            return authorIndex !== -1 ? contents.substring(authorIndex + 3).trim() : '??????';
+        })();
+
+        const novel_writer_url = document.querySelector('div.contents1 > a:nth-child(2)') ?
+            document.querySelector('div.contents1 > a:nth-child(2)').href :
+            null;
         const chapter_title =  document.querySelector('div.contents1 > p') ?
             document.querySelector('div.contents1 > p').innerText.trim() :
             null;
+        const novel_subtitle = document.querySelector('p.novel_subtitle').innerText;
 
         const elm =
 `<div class="us_flow_novel_detail">
     <a class="us_novel_title" href="${novel_page_url}">${novel_title}</a><br>
-    <p>作者：<a class="us_novel_writername" href="${novel_writer_url}">${novel_writername}</a></p>
+    <p>作者：<a class="us_novel_writername" ${novel_writer_url ? `href=${novel_writer_url}`: ''}>${novel_writername}</a></p>
     <p class="us_chapter_title">${chapter_title ? chapter_title : ''}</p>
+    <p class="us_novel_subtitle">${novel_subtitle}</p>
     <br>
-    <p class="us_novel_no">${novel_no}</p>
+    <p class="us_novel_no">${novel_no_str}</p>
     <p class="us_long_update">投稿：---</p>
     <p class="us_revision_update">改稿：---</p>
 </div>`
