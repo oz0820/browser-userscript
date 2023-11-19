@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.18.0
+// @version      2023.11.20.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -103,7 +103,7 @@
                 const transaction = this.db.transaction(['post_date'], 'readwrite');
                 const object_store = transaction.objectStore('post_date');
 
-                const add_req = object_store.add(this.novel_data);
+                const add_req = object_store.put(this.novel_data);
                 add_req.onsuccess = (event) => {
                     resolve();
                 };
