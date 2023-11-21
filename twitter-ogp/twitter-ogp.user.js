@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.11.21.0
+// @version         2023.11.21.1
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -14,6 +14,10 @@
 
     if (window.location.href.startsWith('https://twitter.com')) {
         setInterval(add_ogp_twitter, 500);
+
+        const css = `<style>article[data-testid="tweet"] a[rel="noopener noreferrer nofollow"] { text-decoration: none; }</style>`;
+        const head = document.head || document.querySelector('head');
+        head.insertAdjacentHTML('beforeend', css);
     }
 
     if (window.location.href.startsWith('https://tweetdeck.twitter.com')) {
@@ -22,12 +26,6 @@
 
 
     function add_ogp_twitter() {
-        window.onload = () => {
-            const css = `<style>article[data-testid="tweet"] a[rel="noopener noreferrer nofollow"] { text-decoration: none; }</style>`;
-            const head = document.head || document.querySelector('head');
-            head.insertAdjacentHTML('beforeend', css);
-
-        }
         document.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
             try {
 
