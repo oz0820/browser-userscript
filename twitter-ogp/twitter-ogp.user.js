@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2023.11.14.0
+// @version         2023.11.21.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -22,16 +22,17 @@
 
 
     function add_ogp_twitter() {
+        window.onload = () => {
+            const css = `<style>article[data-testid="tweet"] a[rel="noopener noreferrer nofollow"] { text-decoration: none; }</style>`;
+            const head = document.head || document.querySelector('head');
+            head.insertAdjacentHTML('beforeend', css);
+
+        }
         document.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
             try {
 
                 // 既に処理した要素は飛ばす
                 if (elm.getAttribute('ogp') !== null) {
-                    return;
-                }
-                // 別のタグが紛れ込むことがあったり無かったり……
-                if (!elm.getAttribute('href').startsWith('https://t.co/') &&
-                    !elm.getAttribute('href').startsWith('https://youtu.be/')) {
                     return;
                 }
 
@@ -70,7 +71,7 @@
 
                 // 編集済みのフラグ
                 elm.setAttribute('ogp', '');
-                console.log('add OGP', elm);
+                // console.log('add OGP', elm);
 
             } catch (e) {
                 // 一度エラーなら二度目もエラーなので、対象外に指定する
@@ -118,7 +119,7 @@
 
                     // 編集済みのフラグ
                     elm.setAttribute('ogp', '');
-                    console.log('add OGP', elm);
+                    // console.log('add OGP', elm);
 
                 } catch (e) {
                     // 一度エラーなら二度目もエラーなので、対象外に指定する

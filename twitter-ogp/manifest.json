@@ -1,6 +1,6 @@
 {
   "name": "twitter-OGP",
-  "version": "2023.11.14.0",
+  "version": "2023.11.21.0",
   "manifest_version": 3,
   "description": "TwitterのOGPタイトルなどを復活させます",
   "content_scripts": [{
