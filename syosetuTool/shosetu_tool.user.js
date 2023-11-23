@@ -2,11 +2,12 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.22.0
-// @description  小説家になろうをキーボードだけで読むためのツール。ノベルピアも一部対応。
+// @version      2023.11.23.0
+// @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
 // @match        https://novelpink.jp/viewer/*
+// @match        https://kakuyomu.jp/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/syosetuTool/shosetu_tool.user.js
 // @icon         https://syosetu.com/favicon.ico
 // ==/UserScript==
@@ -320,6 +321,44 @@ p.us_novel_subtitle {
     }
 
 
+    function kakuyomu() {
+        // 本文閲覧ページのみで実行
+        if (!!location.pathname.match(/\/works\/\d+\/episodes\//)) {
+
+            document.addEventListener('keydown', function(e) {
+                const previous_button = document.querySelector('div#contentMain-previousEpisode > a');
+                const next_button = document.querySelector('div#contentMain-nextEpisode > a');
+
+                // 次のページに進む
+                if (e.code === "ControlRight" || e.code === "ControlLeft") {
+                    if (next_button) {
+                        next_button.click();
+                    }
+
+                // 次のページに進む
+                } else if (e.code === "ArrowRight") {
+                    if (next_button) {
+                        next_button.click();
+                    }
+
+                // 前のページに進む
+                } else if (e.code === "ArrowLeft") {
+                    if (previous_button) {
+                        previous_button.click();
+                    }
+
+                // 高速スクロールしたい
+                } else if (e.code === "ArrowUp") {
+                    window.scroll(window.scrollX, window.scrollY-100);
+                } else if (e.code === "ArrowDown") {
+                    window.scroll(window.scrollX, window.scrollY+100);
+
+                } else {
+                    // console.log(e.key);
+                }
+            })
+        }
+    }
 
 
     const hostname = window.location.hostname;
@@ -328,6 +367,9 @@ p.us_novel_subtitle {
     }
     if ('novelpia.jp' === hostname || 'novelpink.jp' === hostname) {
         novelpia();
+    }
+    if ('kakuyomu.jp' === hostname) {
+        kakuyomu();
     }
 
 
