@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter custom style
 // @namespace       https://twitter.com/oz0820
-// @version         2023.11.15.0
+// @version         2023.11.25.0
 // @description     Twitterにオレオレスタイルを適用します．
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -15,6 +15,11 @@
 div.css-1dbjc4n.r-1kihuf0.r-13qz1uu {
     display: none;
 }
+/* twitter web 2023-11-25 */
+div.css-175oi2r.r-1kihuf0.r-13qz1uu {
+    display: none;
+}
+
 div.css-18t94o4.css-1dbjc4n.r-1777fci.r-1pl7oy7.r-1ny4l3l.r-o7ynqc.r-6416eg.r-13qz1uu {
     background-color: aqua;
 }
