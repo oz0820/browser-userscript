@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name            Twitter custom style
 // @namespace       https://twitter.com/oz0820
-// @version         2023.11.26.0
+// @version         2023.11.28.0
 // @description     Twitterにオレオレスタイルを適用します．
 // @author          oz0820
 // @match           https://twitter.com/*
 // @match           https://tweetdeck.twitter.com/*
+// @match           https://pro.twitter.com/*
 // @updateURL       https://github.com/oz0820/browser-userscript/raw/main/twitter-custom-style/twitter-custom-style.user.js
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=twitter.com
 // ==/UserScript==
@@ -33,6 +34,7 @@ div.css-18t94o4.css-1dbjc4n.r-1777fci.r-1pl7oy7.r-1ny4l3l.r-o7ynqc.r-6416eg.r-13
 
     const selector = {
         'tweetdeck.twitter.com': 'div[class="css-1dbjc4n r-1pi2tsx r-11yh6sk r-buy8e9 r-bnwqim r-13qz1uu"]',
+        'pro.twitter.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]',
         'twitter.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]'
     }
     let path = location.pathname
