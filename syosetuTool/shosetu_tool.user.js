@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.23.0
+// @version      2023.11.29.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -130,6 +130,8 @@
         const ncode = document.location.href.split("/")[3];
         const novel_no = document.querySelector("div#novel_no");
 
+
+        // ショートカットキー周り
         document.addEventListener('keydown', function(e) {
             // 一覧ページとかで発動されると困るので
             if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
@@ -185,6 +187,44 @@
                 // console.log(e.key);
             }
         });
+
+
+        /*
+        前後書きの表示・非表示設定
+        デフォで前書き・後書きを非表示にする．
+         */
+        const novel_p = document.querySelector('div#novel_p')
+        const novel_a = document.querySelector('div#novel_a')
+        const hidden_change = (parent_elm) => {  // 渡された要素の子要素に対して，hidden属性を入れ替える
+            Array.from(parent_elm.children).forEach(elm => {
+                try {
+                    if ( elm.hasAttribute('hidden') ) {
+                        elm.removeAttribute('hidden')
+                    } else {
+                        elm.setAttribute('hidden', '')
+                    }
+                } catch (e) {
+                    // console.error(e)
+                    }
+            })
+        }
+        if (!!novel_p) {
+            const mae = `<p style="text-align: center;" hidden>～～前書き（${novel_p.children.length}行）～～</p>`
+            novel_p.insertAdjacentHTML('beforeend', mae)
+            hidden_change(novel_p)
+            novel_p.addEventListener('click', function (e) {
+               hidden_change(e.currentTarget);
+            })
+        }
+        if (!!novel_a) {
+            const ato = `<p style="text-align: center;" hidden>～～後書き（${novel_a.children.length}行）～～</p>`
+            novel_a.insertAdjacentHTML('beforeend', ato)
+            hidden_change(novel_a)
+            novel_a.addEventListener('click', function (e) {
+                hidden_change(e.currentTarget);
+            })
+        }
+
 
         /* TXTダウンロードを新しいタブで開く */
         const txt_dl_elm = document.querySelector('div#novel_footer a[onclick]');
