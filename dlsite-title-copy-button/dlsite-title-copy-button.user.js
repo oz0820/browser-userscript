@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DLSite title copy button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.03.0
+// @version      2023.12.03.1
 // @description  DLSiteの作品ページで，DOJINDBに飛ぶボタンと，タイトル(作品名)をコピーするボタンを追加する
 // @author       oz0820
 // @match        https://www.dlsite.com/*
@@ -100,7 +100,7 @@
         product_page()
     }
 
-    if (location.href.startsWith('https://www.dlsite.com/home/mypage/wishlist/')) {
+    if (location.href.startsWith('https://www.dlsite.com/home/mypage/wishlist')) {
         wishlist_page()
     }
 
