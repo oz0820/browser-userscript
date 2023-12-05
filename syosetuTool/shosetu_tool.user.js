@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.11.29.0
+// @version      2023.12.06.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -331,6 +331,228 @@ p.us_novel_subtitle {
     }
 
 
+    async function syosetu_txt_download() {
+        if (!location.pathname.startsWith('/txtdownload/top/ncode')) {
+            return;
+        }
+
+        const DL_INTERVAL_MS = 5000
+        const RETRY_INTERVAL_MS = 5000
+        const MAX_RETRY = 5
+
+        const import_module = (url) => {
+            const elm = document.createElement('script');
+            elm.src = url;
+            document.head.append(elm);
+        }
+        // JSZipを使う
+        await import_module('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+
+        // TXTダウンロードページ専用
+        const n_code = async () => {
+            const url = document.querySelector('form[name="dl"]').action + '?no=1&hankaku=0&code=utf-8&kaigyo=crlf';
+            return await fetch(url)
+                .then(res => {
+                    const raw_ncode = res.headers.get('Content-Disposition').match(/N\w+/)[0]
+                    return raw_ncode.replace(/[A-Z]/g, match => match.toLowerCase());
+                })
+                .catch(e => {
+                    console.log('Fetch ERROR', e);
+                    return 'n9999999';
+                })
+        }
+
+        // Windows的安全な名前にサニタイズする
+        const safe_file_name = (name) => name.replace(/[\\\/:\*\?\"<>\|]/g, '_');
+
+
+        // 秒を入力すると，良い感じのフォーマットに変換して返す
+        const format_time = sec => {
+            const h = Math.floor(sec / 3600)
+            const m = Math.floor((sec % 3600) / 60)
+            const s = sec % 60
+
+            let ft_time = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+            if (h > 0) {
+                ft_time = `${h.toString().padStart(2, '0')}:${ft_time}`;
+            }
+            return ft_time;
+        }
+
+        const get_content = async (name_and_urls) => {
+            const digit = name_and_urls.length.toString().length;
+            const ncode = await n_code();
+            const retry_fetch = (url, maxRetries = MAX_RETRY, delay = RETRY_INTERVAL_MS) => {
+                return new Promise((resolve, reject) => {
+                    const fetch_data = async (remaining_retries) => {
+                        try {
+                            const response = await fetch(url);
+                            if (!response.ok) {
+                                throw new Error(`Network response was not ok: ${response.status}`);
+                            }
+                            const blob = await response.blob();
+                            resolve(blob);
+                        } catch (error) {
+                            if (remaining_retries > 0) {
+                                setTimeout(() => {
+                                    logger.log(`Retrying ${url} ${remaining_retries} retries left.`);
+                                    fetch_data(remaining_retries - 1);
+                                }, delay);
+                            } else {
+                                reject(error);
+                            }
+                        }
+                    };
+                    fetch_data(maxRetries);
+                });
+            };
+
+            const execute_sequentially = async (name_and_urls) => {
+                const export_data = []
+                for (let i = 0; i < name_and_urls.length; i++) {
+                    const name_url = name_and_urls[i]
+                    const url = name_url.url;
+                    const epi_name = name_url.epi_name;
+                    const epi_number = name_url.epi_number;
+
+                    const eta_str = format_time((name_and_urls.length - i) * DL_INTERVAL_MS / 1000)
+                    const progress_count = String(i + 1).padStart(name_and_urls.length.toString().length, '0')
+                    const eta_msg = `${progress_count} / ${name_and_urls.length} (ETA ${eta_str})`
+                    logger.eta(eta_msg)
+                    try {
+                        const blob = await retry_fetch(url);
+                        const strip_epi_name = epi_name.slice(epi_name.match(/第\d+部分：/)[0].length)
+                        const name = `${ncode}-${String(epi_number).padStart(digit, '0')}_${strip_epi_name}`;
+                        export_data.push({
+                            'name': name,
+                            'blob': blob
+                        })
+                        logger.log('fetch ok. ' + name)
+                    } catch (error) {
+                        console.error('Error fetching data:', error);
+                        break
+                    } finally {
+                        await new Promise(resolve => setTimeout(resolve, DL_INTERVAL_MS));
+                    }
+                }
+                return export_data
+            };
+
+            return await execute_sequentially(name_and_urls)
+        }
+
+        const gen_zip = (contents, export_name) => {
+            const zip = new JSZip();
+            const folder = zip.folder(safe_file_name(export_name));
+            contents.forEach(c => {
+                const file_name = safe_file_name(c.name) + '.txt';
+                const content = c.blob;
+                folder.file(file_name, content);
+            })
+
+            return zip.generateAsync({type: 'blob', compression: "DEFLATE", compressionOptions: {level: 9}});
+        }
+
+        const save_blob = (blob, name) => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = safe_file_name(name) + '.zip';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
+
+
+        const name_and_urls = () => {
+            const params = new URLSearchParams();
+
+            const epi_names = Array.from(document.body.querySelector('select[name="no"]').children).map(elm => elm.innerText);
+            const queries = {
+                'hankaku': document.querySelector('select[name="hankaku"]').value,
+                'code': document.querySelector('select[name="code"]').value,
+                'kaigyo': document.querySelector('select[name="kaigyo"]').value
+            }
+
+            Object.entries(queries).forEach(q => params.append(q[0], q[1]));
+            const base_url = document.querySelector('form[name="dl"]').action + '?' + params.toString();
+
+
+            return epi_names.map((epi_name, i) => {
+                return {
+                    'epi_name': epi_name,
+                    'url': `${base_url}&no=${i + 1}`,
+                    'epi_number': i + 1
+                }
+            })
+        }
+
+        const logger_c = class {
+            constructor() {
+                this.textarea = document.querySelector('textarea#st_log_area')
+                this.eta_elm = document.querySelector('span#eta_area')
+            }
+
+            eta(msg) {
+                this.eta_elm.innerText = msg
+            }
+
+            log(msg, show = true) {
+                if (typeof show !== 'boolean') {
+                    this.error('logger error msg: ' + msg + '\tshow: ' + show)
+                } else {
+                    console.log('[syosetu_tool] ' + msg)
+                    this.textarea.textContent += '\n' + msg
+                    this._update()
+                }
+            }
+
+            error(msg, show = true) {
+                if (typeof show !== 'boolean') {
+                    this.error('logger error msg: ' + msg + '\tshow: ' + show)
+                } else {
+                    console.error('[syosetu_tool] ' + msg)
+                    this.textarea.textContent += '\n' + msg
+                    this._update()
+                }
+            }
+
+            _update() {
+                this.textarea.scrollTop = this.textarea.scrollHeight
+            }
+        }
+
+        const novel_title = document.body.querySelector('center > font').innerText.trim();
+        const zip_name = `${await n_code()}_${novel_title}`
+
+        const elm = `<tr>
+<td colspan="4" align="center">
+<br>
+<input type="button" value="全件ダウンロードを実行します" id="dl_all">
+<br>
+<span id="eta_area"></span>
+<br>
+
+<textarea id="st_log_area" style="width: 350px; height: 100px; font-size: 10px" readonly></textarea>
+</td>
+</tr>`
+        document.querySelector('tbody').insertAdjacentHTML('beforeend', elm);
+
+        const logger = new logger_c()
+        document.querySelector('input#dl_all').addEventListener('click', async () => {
+            if (typeof (novel_zip_blob) === 'undefined') {
+                const nau = name_and_urls()
+                const contents = await get_content(nau)
+                novel_zip_blob = await gen_zip(contents, zip_name);
+                await save_blob(novel_zip_blob, zip_name);
+            } else {
+                await save_blob(novel_zip_blob, zip_name);
+            }
+        })
+    }
+
+
 
     function novelpia() {
         function move_to_next_page() {
@@ -401,9 +623,12 @@ p.us_novel_subtitle {
     }
 
 
-    const hostname = window.location.hostname;
+    const hostname = location.hostname;
     if ('ncode.syosetu.com' === hostname) {
         syosetu();
+        if (location.pathname.startsWith('/txtdownload/')) {
+            syosetu_txt_download()
+        }
     }
     if ('novelpia.jp' === hostname || 'novelpink.jp' === hostname) {
         novelpia();
