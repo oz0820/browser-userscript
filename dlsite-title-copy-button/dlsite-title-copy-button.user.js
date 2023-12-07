@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DLSite title copy button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.07.0
+// @version      2023.12.07.1
 // @description  DLSiteの作品ページで，DOJINDBに飛ぶボタンと，タイトル(作品名)をコピーするボタンを追加する
 // @author       oz0820
 // @match        https://www.dlsite.com/*
@@ -77,7 +77,6 @@
          window.onload = () => {
              document.querySelectorAll('dl > dd.work_price_wrap').forEach(price_elm => {
                  try {
-
                      const work_col = price_elm.parentNode
                      const item_url = work_col.querySelector('a').href
 
@@ -93,7 +92,9 @@
                      dojindb_elm.appendChild(dojindb_img)
 
                      price_elm.insertAdjacentElement('beforeend', dojindb_elm)
-                 } catch (e) {}
+                 } catch (e) {
+                     console.error(e)
+                 }
              })
          }
      }
@@ -103,10 +104,10 @@
         product_page()
     }
 
-    if (location.href.startsWith('https://www.dlsite.com/home/mypage/wishlist')) {
+    if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/mypage\/wishlist/)) {
         add_dojindb_button()
     }
-    if (/https:\/\/www.dlsite.com\/\w+\/circle\/profile\/=\/maker_id/.test(location.href)) {
+    if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/circle\/profile\/=\/maker_id/)) {
         add_dojindb_button()
     }
 
