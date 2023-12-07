@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.12.06.0
+// @version      2023.12.07.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -245,33 +245,34 @@
             return;
         }
 
-        const style_elm = `<style>
-@media screen and (max-width: 1120px) {
-    .us_flow_novel_detail{
-        display: none;
-    }
-}
-.us_flow_novel_detail {
-    top: 50px;
-    position: fixed;
-    padding: 10px;
-    width: calc((100% - 750px) / 2);
-    max-width: 450px;
-}
-.long_update {
-    line-height: 150%;
-}
-.revision_update {
-    line-height: 150%;
-}
-p.us_novel_no {
-    color: #999999;
-    font-size: 90%;
-}
-p.us_novel_subtitle {
-    font-weight: bold;
-}
-</style>`
+        const style_elm =
+            `<style>
+                @media screen and (max-width: 1120px) {
+                    .us_flow_novel_detail{
+                        display: none;
+                    }
+                }
+                .us_flow_novel_detail {
+                    top: 50px;
+                    position: fixed;
+                    padding: 10px;
+                    width: calc((100% - 750px) / 2);
+                    max-width: 450px;
+                }
+                .long_update {
+                    line-height: 150%;
+                }
+                .revision_update {
+                    line-height: 150%;
+                }
+                p.us_novel_no {
+                    color: #999999;
+                    font-size: 90%;
+                }
+                p.us_novel_subtitle {
+                    font-weight: bold;
+                }
+            </style>`
         document.head.insertAdjacentHTML('beforeend', style_elm);
 
         const episode_number = Number(location.href.split('/')[4]);
@@ -294,28 +295,18 @@ p.us_novel_subtitle {
         const novel_subtitle = document.querySelector('p.novel_subtitle').innerText;
 
         const elm =
-`<div class="us_flow_novel_detail">
-    <a class="us_novel_title" href="${novel_page_url}">${novel_title}</a><br>
-    <p>作者：<a class="us_novel_writername" ${novel_writer_url ? `href=${novel_writer_url}`: ''}>${novel_writername}</a></p>
-    <p class="us_chapter_title">${chapter_title ? chapter_title : ''}</p>
-    <p class="us_novel_subtitle">${novel_subtitle}</p>
-    <br>
-    <p class="us_novel_no">${novel_no_str}</p>
-    <p class="us_long_update">投稿：---</p>
-    <p class="us_revision_update">改稿：---</p>
-</div>`
+            `<div class="us_flow_novel_detail">
+                <a class="us_novel_title" href="${novel_page_url}">${novel_title}</a><br>
+                <p>作者：<a class="us_novel_writername" ${novel_writer_url ? `href=${novel_writer_url}`: ''}>${novel_writername}</a></p>
+                <p class="us_chapter_title">${chapter_title ? chapter_title : ''}</p>
+                <p class="us_novel_subtitle">${novel_subtitle}</p>
+                <br>
+                <p class="us_novel_no">${novel_no_str}</p>
+                <p class="us_long_update">投稿：---</p>
+                <p class="us_revision_update">改稿：---</p>
+            </div>`
         document.querySelector('div#container').insertAdjacentHTML('beforeend', elm);
 
-        /*
-        const ndm = new novel_data_manager(ncode);
-        ndm.get_epi(episode_number)
-            .then(novel_data => {
-                document.querySelector('div.us_flow_novel_detail > .us_long_update').textContent = '投稿：' + novel_data.long_update_str;
-                if (novel_data.revision_update_str) {
-                    document.querySelector('div.us_flow_novel_detail > .us_revision_update').textContent = '改稿：' + novel_data.revision_update_str;
-                }
-            });
-         */
 
         const ndm = new novel_data_manager();
         ndm.init(ncode)
@@ -326,7 +317,10 @@ p.us_novel_subtitle {
                         if (novel_data.revision_update_str) {
                             document.querySelector('div.us_flow_novel_detail > .us_revision_update').textContent = '改稿：' + novel_data.revision_update_str;
                         }
-                    }).catch(e => console.error(e))
+                    })
+                    .catch(e => {
+                        console.error(e)
+                    })
             })
     }
 
@@ -336,7 +330,7 @@ p.us_novel_subtitle {
             return;
         }
 
-        const DL_INTERVAL_MS = 5000
+        const DL_INTERVAL_MS = 4000
         const RETRY_INTERVAL_MS = 5000
         const MAX_RETRY = 5
 
@@ -349,7 +343,7 @@ p.us_novel_subtitle {
         await import_module('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
 
         // TXTダウンロードページ専用
-        const n_code = async () => {
+        const get_ncode = async () => {
             const url = document.querySelector('form[name="dl"]').action + '?no=1&hankaku=0&code=utf-8&kaigyo=crlf';
             return await fetch(url)
                 .then(res => {
@@ -372,17 +366,17 @@ p.us_novel_subtitle {
             const m = Math.floor((sec % 3600) / 60)
             const s = sec % 60
 
-            let ft_time = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            let formatted_time = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
             if (h > 0) {
-                ft_time = `${h.toString().padStart(2, '0')}:${ft_time}`;
+                formatted_time = `${h.toString().padStart(2, '0')}:${formatted_time}`;
             }
-            return ft_time;
+            return formatted_time;
         }
 
         const get_content = async (name_and_urls) => {
             const digit = name_and_urls.length.toString().length;
-            const ncode = await n_code();
+            const ncode = await get_ncode();
             const retry_fetch = (url, maxRetries = MAX_RETRY, delay = RETRY_INTERVAL_MS) => {
                 return new Promise((resolve, reject) => {
                     const fetch_data = async (remaining_retries) => {
@@ -433,7 +427,9 @@ p.us_novel_subtitle {
                         console.error('Error fetching data:', error);
                         break
                     } finally {
-                        await new Promise(resolve => setTimeout(resolve, DL_INTERVAL_MS));
+                        if (i + 1 !== name_and_urls.length) {  // 最後はdelayする必要無いので
+                            await new Promise(resolve => setTimeout(resolve, DL_INTERVAL_MS));
+                        }
                     }
                 }
                 return export_data
@@ -442,16 +438,15 @@ p.us_novel_subtitle {
             return await execute_sequentially(name_and_urls)
         }
 
-        const gen_zip = (contents, export_name) => {
+        const gen_zip = (contents) => {
             const zip = new JSZip();
-            const folder = zip.folder(safe_file_name(export_name));
             contents.forEach(c => {
-                const file_name = safe_file_name(c.name) + '.txt';
-                const content = c.blob;
-                folder.file(file_name, content);
+                const file_name = safe_file_name(c.name) + '.txt'
+                const content = c.blob
+                zip.file(file_name, content)
             })
 
-            return zip.generateAsync({type: 'blob', compression: "DEFLATE", compressionOptions: {level: 9}});
+            return zip.generateAsync({type: 'blob', compression: "DEFLATE", compressionOptions: {level: 9}})
         }
 
         const save_blob = (blob, name) => {
@@ -524,7 +519,7 @@ p.us_novel_subtitle {
         }
 
         const novel_title = document.body.querySelector('center > font').innerText.trim();
-        const zip_name = `${await n_code()}_${novel_title}`
+        const zip_name = `${await get_ncode()}_${novel_title}`
 
         const elm = `<tr>
 <td colspan="4" align="center">
@@ -544,7 +539,7 @@ p.us_novel_subtitle {
             if (typeof (novel_zip_blob) === 'undefined') {
                 const nau = name_and_urls()
                 const contents = await get_content(nau)
-                novel_zip_blob = await gen_zip(contents, zip_name);
+                novel_zip_blob = await gen_zip(contents);
                 await save_blob(novel_zip_blob, zip_name);
             } else {
                 await save_blob(novel_zip_blob, zip_name);
