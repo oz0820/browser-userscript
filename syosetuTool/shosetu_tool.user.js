@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.12.07.0
+// @version      2023.12.07.1
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -330,7 +330,7 @@
             return;
         }
 
-        const DL_INTERVAL_MS = 4000
+        const DL_INTERVAL_MS = 5000
         const RETRY_INTERVAL_MS = 5000
         const MAX_RETRY = 5
 
@@ -357,7 +357,18 @@
         }
 
         // Windows的安全な名前にサニタイズする
-        const safe_file_name = (name) => name.replace(/[\\\/:\*\?\"<>\|]/g, '_');
+        const safe_file_name = (name, max_len = 0) => {
+            if (max_len === 0) {
+                return name.replace(/[\\\/:\*\?\"<>\|]/g, '_')
+            } else {
+                const tmp = name.replace(/[\\\/:\*\?\"<>\|]/g, '_')
+                if (tmp.length <= max_len) {
+                    return tmp
+                } else {
+                    return tmp.slice(0, max_len-2) + '……'
+                }
+            }
+        }
 
 
         // 秒を入力すると，良い感じのフォーマットに変換して返す
@@ -438,12 +449,13 @@
             return await execute_sequentially(name_and_urls)
         }
 
-        const gen_zip = (contents) => {
+        const gen_zip = (contents, zip_name) => {
             const zip = new JSZip();
+            const folder = zip.folder(safe_file_name(zip_name))
             contents.forEach(c => {
                 const file_name = safe_file_name(c.name) + '.txt'
                 const content = c.blob
-                zip.file(file_name, content)
+                folder.file(file_name, content)
             })
 
             return zip.generateAsync({type: 'blob', compression: "DEFLATE", compressionOptions: {level: 9}})
@@ -452,7 +464,7 @@
         const save_blob = (blob, name) => {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = safe_file_name(name) + '.zip';
+            a.download = safe_file_name(name, 50) + '.zip';
             a.style.display = 'none';
             document.body.appendChild(a);
             a.click();
@@ -470,7 +482,7 @@
                 'kaigyo': document.querySelector('select[name="kaigyo"]').value
             }
 
-            Object.entries(queries).forEach(q => params.append(q[0], q[1]));
+            Object.entries(queries).forEach(querie => params.append(querie[0], querie[1]));
             const base_url = document.querySelector('form[name="dl"]').action + '?' + params.toString();
 
 
@@ -539,7 +551,7 @@
             if (typeof (novel_zip_blob) === 'undefined') {
                 const nau = name_and_urls()
                 const contents = await get_content(nau)
-                novel_zip_blob = await gen_zip(contents);
+                novel_zip_blob = await gen_zip(contents, zip_name);
                 await save_blob(novel_zip_blob, zip_name);
             } else {
                 await save_blob(novel_zip_blob, zip_name);
