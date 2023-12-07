@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DLSite title copy button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.03.1
+// @version      2023.12.07.0
 // @description  DLSiteの作品ページで，DOJINDBに飛ぶボタンと，タイトル(作品名)をコピーするボタンを追加する
 // @author       oz0820
 // @match        https://www.dlsite.com/*
@@ -72,28 +72,31 @@
          }
      }
 
-     const wishlist_page = () => {
+     // wishlistやサークルページで，各商品ごとにdojindbボタンを追加する
+     const add_dojindb_button = () => {
          window.onload = () => {
-             document.querySelectorAll('table.n_worklist > tbody tr._favorite_item').forEach(item => {
-                 const item_url = item.querySelector('dt.work_name > a').href
+             document.querySelectorAll('dl > dd.work_price_wrap').forEach(price_elm => {
+                 try {
 
-                 const dojindb_img = document.createElement('img')
-                 dojindb_img.src = 'https://www.google.com/s2/favicons?sz=64&domain=dojindb.net'
-                 dojindb_img.style.marginLeft = '6px'
-                 dojindb_img.style.height = '18px'
+                     const work_col = price_elm.parentNode
+                     const item_url = work_col.querySelector('a').href
 
-                 const dojindb_elm = document.createElement('a')
-                 dojindb_elm.href = `https://dojindb.net/rd?u=${item_url}`
-                 dojindb_elm.target = '_blank'
-                 dojindb_elm.title = 'DOJINDBに飛びます'
-                 dojindb_elm.appendChild(dojindb_img)
+                     const dojindb_img = document.createElement('img')
+                     dojindb_img.src = 'https://www.google.com/s2/favicons?sz=64&domain=dojindb.net'
+                     dojindb_img.style.marginLeft = '6px'
+                     dojindb_img.style.height = '16px'
 
-                 const price_elm = item.querySelector('dd.work_price_wrap')
-                 price_elm.insertAdjacentElement('beforeend', dojindb_elm)
+                     const dojindb_elm = document.createElement('a')
+                     dojindb_elm.href = `https://dojindb.net/rd?u=${item_url}`
+                     dojindb_elm.target = '_blank'
+                     dojindb_elm.title = 'DOJINDBに飛びます'
+                     dojindb_elm.appendChild(dojindb_img)
+
+                     price_elm.insertAdjacentElement('beforeend', dojindb_elm)
+                 } catch (e) {}
              })
          }
      }
-
 
 
     if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/work\/=\/product_id\/\w+.html/)) {
@@ -101,11 +104,11 @@
     }
 
     if (location.href.startsWith('https://www.dlsite.com/home/mypage/wishlist')) {
-        wishlist_page()
+        add_dojindb_button()
     }
-
-
-
+    if (/https:\/\/www.dlsite.com\/\w+\/circle\/profile\/=\/maker_id/.test(location.href)) {
+        add_dojindb_button()
+    }
 
 
     function _copy_to_clipboard(text) {
