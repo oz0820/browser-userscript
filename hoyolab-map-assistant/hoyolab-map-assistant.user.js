@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         テイワットマップ補助ツール
-// @version      2023.12.10.0
+// @version      2023.12.10.1
 // @description  テイワットマップにいくつか手を加えます
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
@@ -13,27 +13,15 @@
 (function() {
 
     const work = () => {
-        let elm = document.querySelector('img.map-popup__img');
-        if (!elm) {
-            return;
+        let img_elm = document.querySelector('img.map-popup__img')
+        if (!img_elm) {
+            return
         }
-        if (!elm.classList.contains('new_window')){
-            elm.addEventListener('click', function (e) {
-                const a = document.createElement('a');
-                a.href = e.target.src;
-                a.target = '_blank';
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            });
-            elm.classList.add('new_window');
-        }
-    }
-
-    // 画像にカーソルインしたときにクリックできそうな見た目にしたいので
-    window.onload = () => {
-        (document.head || document.querySelector('head'))?.insertAdjacentHTML('beforeend', `<style> div.map-popup__info { cursor: pointer; }</style>`)
+        const parent = img_elm.parentNode
+        const a_elm = document.createElement('a')
+        a_elm.href = img_elm.src
+        a_elm.appendChild(img_elm.cloneNode(true))
+        parent.replaceChild(a_elm, img_elm)
     }
 
     // 新しいピンを開くたびに変更を適用する
