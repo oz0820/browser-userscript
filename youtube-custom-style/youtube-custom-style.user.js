@@ -35,11 +35,14 @@
 
     // ライブチャットのハートマークが邪魔なので
     const add_elm =
-`<style>
-yt-reaction-control-panel-view-model { margin-bottom: 50px; opacity: 0.4; }
-yt-reaction-control-panel-view-model:hover { opacity: 1.0; }
-</style>`;
-    document.head.insertAdjacentHTML('beforeend', add_elm);
+        `<style>
+            yt-reaction-control-panel-overlay-view-model div#reaction-control-panel { margin-bottom: 50px; }
+            yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model { opacity: 0.4; }
+            yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model:hover { opacity: 1.0; }
+        </style>`;
+    if (new URL(location.href).pathname.startsWith('/live_chat')) {
+        document.head.insertAdjacentHTML('beforeend', add_elm);
+    }
 
     if (location.href.startsWith('https://www.youtube.com/watch')) {
         title_font_replace();
