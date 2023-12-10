@@ -6,7 +6,10 @@ YouTubeのスタイルを好き勝手に弄ります。
 - タイトルのフォントが重すぎるので、過去のスタイルに戻す
 - ダークテーマの背景を完全な黒にする
 - 月一の○○の日のアレを大体消した
-- ライブチャットのハートマークを6割くらい透過して，コメントを読みやすくする
+- ライブチャットのハートマークを6割くらい透過してコメントを読みやすくする
+- ハートマークを上に50px移動させて，最新コメントの三点メニューを押せるようにする
+
+![youtube-custom-style_01.gif](https://raw.githubusercontent.com/oz0820/browser-userscript/images/youtube-custom-style/youtube-custom-style_01.gif)
 
 
 ### インストール
