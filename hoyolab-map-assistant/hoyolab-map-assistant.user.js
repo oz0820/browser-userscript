@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ホヨバ補助ツール
-// @version      2023.12.13.0
+// @version      2023.12.13.1
 // @description  テイワットマップのピン画像を新しいタブで開く機能と，『Genshin Impact』『Honkai: Star Rail』のデイリーボタンを押す機能を追加します
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
@@ -15,6 +15,35 @@
 (async function () {
 
     const teyvat_map = () => {
+
+        const style_html =
+            `<style>
+                div.map-popup__switch {
+                    height: 1rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.30rem;
+                }
+                
+                /* ピンの画像の縦幅を制限する
+                img.map-popup__img {
+                    max-height: 2rem;
+                }
+                div.map-popup__info {
+                    text-align: center;
+                }
+                 */
+                
+                div.map-popup__btn-edit {
+                    height: 1rem;
+                    text-align: left;
+                    align-items: center;
+                    display: flex;
+                }
+            </style>`;
+        (document.head || document.querySelector('head')).insertAdjacentHTML('beforeend', style_html)
+
         const work = () => {
             let img_elm = document.querySelector('img.map-popup__img')
             if (!img_elm) {
@@ -94,12 +123,15 @@
 
 
     if (location.href.startsWith('https://act.hoyolab.com/ys/app/interactive-map/index.html')) {
+        console.info('start teyvat_map script')
         teyvat_map()
     }
     if (location.href.startsWith('https://act.hoyolab.com/ys/event/signin-sea-v3/index.html')) {
+        console.info('start GenshinImpact_daily script')
         await GenshinImpact_daily()
     }
     if (location.href.startsWith('https://act.hoyolab.com/bbs/event/signin/hkrpg/index.html')) {
+        console.info('start StarRail_daily script')
         await StarRail_daily()
     }
 
