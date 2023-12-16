@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Youtube Thumbnail Button
+// @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.01.03.0
+// @version      2023.12.16.0
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -14,7 +14,7 @@
     let thumbnail_ok = false;
     let href = window.location.href;
 
-    const sleep = ms => new Promise(res => setTimeout(res, ms));
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     // ページ移動を検出します
     const observer = new MutationObserver(function () {
@@ -71,19 +71,22 @@
             for (let i = 0; i < 100; i++) {
                 if (thumbnail_ok) {
                     try {
-                        let elm = document.getElementById('extended_thumbnail');
-                        elm.src = thumbnail_url;
+                        document.querySelector('img#extended_thumbnail.ytd-extended-thumbnail').src = thumbnail_url;
+                        document.querySelector('a.ytd-extended-thumbnail.wrapper').src = thumbnail_url;
                     } catch (e) {
-                        let elm = document.getElementsByTagName('ytd-watch-next-secondary-results-renderer')[0];
-                        let html = '<img src="' + thumbnail_url + '" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="border-radius: 15px" alt="extended_thumbnail" title="新しいタブで開く">';
+                        for (let elm of document.querySelectorAll('.ytd-extended-thumbnail')) {
+                            elm?.remove();
+                        }
+                        let elm = document.querySelector('ytd-watch-next-secondary-results-renderer');
+                        let html =
+                            `<a class="ytd-extended-thumbnail wrapper" href="${thumbnail_url}" target="_blank">
+                                <img src="${thumbnail_url}" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" alt="extended_thumbnail" title="新しいタブで開く">
+                            </a>`;
                         // 非ログイン状態だと関連動画と合体してしまうので、1行改行を入れる
                         if (document.getElementsByTagName('yt-related-chip-cloud-renderer').length === 0) {
                             html += '<br>';
                         }
                         elm.insertAdjacentHTML('afterbegin', html);
-                        document.getElementById('extended_thumbnail').addEventListener('click', function () {
-                           window.open(thumbnail_url);
-                        });
                     }
                     break;
                 }
@@ -93,6 +96,18 @@
     }
 
     async function init() {
+        const my_style =
+            `<style>
+                .ytd-extended-thumbnail {
+                    border-radius: 15px;
+                }
+                img#extended_thumbnail.ytd-extended-thumbnail {
+                    width: 100%;
+                    height: auto
+                }
+            </style>`;
+        ( document.head || document.querySelector('head') )?.insertAdjacentHTML('beforeend', my_style)
+
         for (let i = 0; i < 50; i++) {
             try {
                 // 雑にボタン追加します
