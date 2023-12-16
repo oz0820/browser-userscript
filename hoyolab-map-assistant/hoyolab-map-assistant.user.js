@@ -14,8 +14,7 @@
 
 (async function () {
 
-    const teyvat_map = () => {
-
+    const teyvat_map = async () => {
         const style_html =
             `<style>
                 div.map-popup__switch {
@@ -47,6 +46,7 @@
         const work = () => {
             let img_elm = document.querySelector('img.map-popup__img')
             if (!img_elm) {
+                console.warn('img.map-popup__img NO FOUND!!')
                 return
             }
             const parent = img_elm.parentNode
@@ -57,12 +57,25 @@
         }
 
         // 新しいピンを開くたびに変更を適用する
-        const observer = new MutationObserver(function (e) {
-            if (e[0].target.className === 'expand-popup') {
+        const observer =  new MutationObserver(function (e) {
+            if (e[0].target.classList.contains('expand-popup')) {
                 work()
             }
         })
-        observer.observe(document.querySelector("#root"), {attributes: true})
+
+        // 空のrootを拾うことが多かったのでチェックする
+        while (true) {
+            const target = document.querySelector("body > div#root")
+            if (!!target) {
+                if (target?.childElementCount !== 0) {
+                    observer.observe(target, {attributes: true})
+                    console.log('Start MutationObserver', target)
+                    break
+                }
+            }
+            console.log('observer sleep')
+            await new Promise(resolve => setTimeout(resolve, 500))
+        }
     }
 
     const GenshinImpact_daily = async () => {
@@ -124,7 +137,7 @@
 
     if (location.href.startsWith('https://act.hoyolab.com/ys/app/interactive-map/index.html')) {
         console.info('start teyvat_map script')
-        teyvat_map()
+        await teyvat_map()
     }
     if (location.href.startsWith('https://act.hoyolab.com/ys/event/signin-sea-v3/index.html')) {
         console.info('start GenshinImpact_daily script')
