@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ホヨバ補助ツール
-// @version      2023.12.13.1
+// @version      2023.12.18.0
 // @description  テイワットマップのピン画像を新しいタブで開く機能と，『Genshin Impact』『Honkai: Star Rail』のデイリーボタンを押す機能を追加します
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
@@ -51,7 +51,8 @@
             }
             const parent = img_elm.parentNode
             const a_elm = document.createElement('a')
-            a_elm.href = img_elm.src
+            const image_url_obj = new URL(img_elm.src)
+            a_elm.href = image_url_obj.origin + image_url_obj.pathname
             a_elm.appendChild(img_elm.cloneNode(true))
             parent.replaceChild(a_elm, img_elm)
         }
