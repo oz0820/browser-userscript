@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ホヨバ補助ツール
-// @version      2023.12.18.0
+// @version      2023.12.21.0
 // @description  テイワットマップのピン画像を新しいタブで開く機能と，『Genshin Impact』『Honkai: Star Rail』のデイリーボタンを押す機能を追加します
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
@@ -8,6 +8,7 @@
 // @match        https://act.hoyolab.com/ys/app/interactive-map/index.html*
 // @match        https://act.hoyolab.com/ys/event/signin-sea-v3/index.html*
 // @match        https://act.hoyolab.com/bbs/event/signin/hkrpg/index.html*
+// @match        https://genshin-impact-map.appsample.com
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=hoyolab.com
 // ==/UserScript==
 
@@ -135,6 +136,46 @@
         return false
     }
 
+    const genshin_impact_map = async () => {
+        const work = () => {
+            let img_elm = document.querySelector("img.imgur")
+            if (!img_elm) {
+                console.warn('img.map-popup__img NO FOUND!!')
+                return
+            }
+            const parent = img_elm.parentNode
+            const a_elm = document.createElement('a')
+            a_elm.target = '_blank'
+            const image_url_obj = new URL(img_elm.src)
+            a_elm.href = image_url_obj.origin + image_url_obj.pathname
+            a_elm.appendChild(img_elm.cloneNode(true))
+            parent.replaceChild(a_elm, img_elm)
+        }
+
+        // 新しいピンを開くたびに変更を適用する
+        const observer = new MutationObserver(function (e) {
+            if (document.body.style.overflow === 'hidden') {
+                work()
+            }
+        })
+
+        // 空のrootを拾うことが多かったのでチェックする
+        while (true) {
+            const check = document.querySelector('body > div#__next')
+            if (!!check) {
+                const target = document.body
+                if (!!target) {
+                    observer.observe(target, {attributes: true})
+                    console.log('Start MutationObserver', target)
+                    break
+                }
+            }
+
+            console.log('observer sleep')
+            await new Promise(resolve => setTimeout(resolve, 500))
+        }
+    }
+
 
     if (location.href.startsWith('https://act.hoyolab.com/ys/app/interactive-map/index.html')) {
         console.info('start teyvat_map script')
@@ -147,6 +188,10 @@
     if (location.href.startsWith('https://act.hoyolab.com/bbs/event/signin/hkrpg/index.html')) {
         console.info('start StarRail_daily script')
         await StarRail_daily()
+    }
+    if (location.href.startsWith('https://genshin-impact-map.appsample.com')) {
+        console.info('start genshin-impact-map script')
+        await genshin_impact_map()
     }
 
 })();
