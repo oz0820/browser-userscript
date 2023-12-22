@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name         TweetDeck Scrollbar Remover
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.22.0
+// @version      2023.12.22.1
 // @description  新TweetDeckのスクロールバーを消します。ついでにパディングを削って情報密度を上げます。弊害があるので自己責任でお願いします。
 // @author       oz0820
 // @match        https://tweetdeck.twitter.com/*
 // @match        https://pro.twitter.com/*
+// @run-at       document-start
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/tweetdeck-scrollbar-remover/tweetdeck-scrollbar-remover.user.js
 // @icon         data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNiAyNiI+PHBhdGggZD0iTTIyLjIsMC4ySDMuOUMyLDAuMiwwLjUsMS43LDAuNSwzLjZ2MTUuNWMwLDEuOSwxLjUsMy40LDMuNCwzLjRoNS43bDMuNCwzLjRsMy40LTMuNGg1LjdjMS45LDAsMy40LTEuNSwzLjQtMy40VjMuNkMyNS43LDEuNywyNC4xLDAuMiwyMi4yLDAuMnoiIGZpbGw9IiMxREExRjIiLz48cGF0aCBkPSJNOS44LDE4LjZjNi4zLDAsOS44LTUuMiw5LjgtOS44VjguNGMwLjctMC41LDEuMy0xLjEsMS43LTEuOGMtMC42LDAuMy0xLjMsMC41LTIsMC41YzAuNy0wLjQsMS4zLTEuMSwxLjUtMS45Yy0wLjYsMC40LTEuNCwwLjctMi4yLDAuOGMtMC42LTAuNi0xLjUtMS0yLjUtMWMtMS45LDAtMy40LDEuNS0zLjQsMy40YzAsMC4zLDAsMC41LDAuMSwwLjhDOS45LDksNy40LDcuNyw1LjcsNS42QzUuNCw2LjEsNS4yLDYuNyw1LjIsNy4zYzAsMS4yLDAuNiwyLjIsMS41LDIuOWMtMC41LDAtMS4xLTAuMi0xLjUtMC41YzAsMS43LDEuMiwzLjEsMi44LDMuNGMtMC4zLDAuMS0wLjYsMC4xLTAuOSwwLjFjLTAuMiwwLTAuNCwwLTAuNi0wLjFjMC40LDEuNCwxLjcsMi40LDMuMiwyLjRDOC41LDE2LjQsNywxNyw1LjQsMTdINC42QzYsMTgsNy44LDE4LjYsOS44LDE4LjYiIGZpbGw9IiNGRkZGRkYiLz48L3N2Zz4=
 // ==/UserScript==
 
 (function() {
-    const wait = async sec => new Promise(resolve => setTimeout(resolve, sec))
+    const delay = async sec => new Promise(resolve => setTimeout(resolve, sec))
 
     const css = `
 /* カラムのタグ */
@@ -39,7 +40,7 @@
     `;
 
 
-    wait(5000).then(() => {
+    delay(5000).then(() => {
         // スクロールバーを消して要素の隙間を削って情報量を増やす
         const head = document.head || document.getElementsByTagName('head')[0];
         const style = document.createElement('style');
