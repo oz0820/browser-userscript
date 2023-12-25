@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.11.25.0
+// @version         2023.12.25.0
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -9,50 +9,61 @@
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
 
-(function () {
-
-    // ページ移動を検出します
-    let path = location.pathname
-    let channel_handle = ''
-    const observer = new MutationObserver(async function () {
-        if (path !== location.pathname) {
-            path = location.pathname
-
-            // チャンネルページ以外では実行しない
-            if (!location.pathname.startsWith('/@') && location.pathname !== '/channel') {
-                return
-            }
-
-            // チャンネル別チャンネルに移動したときだけ実行する
-            if (channel_handle !== location.pathname.split('/')[1]) {
-                channel_handle = location.pathname.split('/')[1]
-                await init()
+(async function () {
+    const logger = new class {
+        head = '[YT-Original-channel-ID]'
+        isDebug = false
+        info(msg) {
+            console.info(this.head + ' ' + msg)
+        }
+        log(msg) {
+            console.log(this.head + ' ' + msg)
+        }
+        warn(msg) {
+            console.warn(this.head + ' ' + msg)
+        }
+        error(msg) {
+            console.error(this.head + ' ' + msg)
+        }
+        debug(msg) {
+            if (this.isDebug) {
+                console.info(this.head + '[DEBUG] ' + msg)
             }
         }
-    })
-    observer.observe(document, { childList: true, subtree: true })
-
-    // チャンネルページ以外では実行しない
-    if (!location.pathname.startsWith('/@') && location.pathname !== '/channel') {
-        return
     }
 
-    window.onload = async () => {
-        await init()
+    /* TOOLS*/
+
+    const copyToClipboard = text => {
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                logger.info(`テキストがクリップボードにコピーされました: ${text}`)
+            })
+            .catch(err => {
+                logger.error('クリップボードへのアクセスに失敗しました: ' + err.message)
+                alert("クリップボードへのアクセスに失敗しました\n" + err)
+            })
     }
 
+    /*
+    ここから本文
+     */
 
-    const init = async () => {
+    const work = async () => {
+        logger.debug('init start')
+        // 念のため削除
+        document.querySelectorAll('.yt_og_channel_id').forEach((elm) => {
+            elm.remove()
+        })
+        logger.debug('過去要素削除')
+
         const cid = await original_channel_id()
+        logger.debug('get cid')
 
         if (!cid) {
             logger.error('ChannelIDが見つかりません')
             return
         }
-        // 念のため削除
-        document.querySelectorAll('.yt_og_channel_id').forEach((elm) => {
-            elm.remove()
-        })
 
         const ex_html = `
 <span class="meta-item style-scope ytd-c4-tabbed-header-renderer yt_og_channel_id">
@@ -69,6 +80,7 @@
         // チャンネルのハンドルを表示する要素の後ろに ex_html を挿入する
         document.querySelectorAll('div#inner-header-container span.ytd-c4-tabbed-header-renderer yt-formatted-string#channel-handle')
             .forEach(elm => {
+                logger.debug(elm)
                 elm.parentElement.insertAdjacentHTML('afterend', ex_html)
             })
 
@@ -98,6 +110,8 @@
                 copyToClipboard(e.target.innerHTML.trim())
             })
         })
+
+        logger.log('表示OK')
     }
 
 
@@ -127,34 +141,49 @@
         }
     }
 
-
-    /* TOOLS*/
-
-    const copyToClipboard = text => {
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                logger.info(`テキストがクリップボードにコピーされました: ${text}`)
-            })
-            .catch(err => {
-                logger.error('クリップボードへのアクセスに失敗しました: ' + err.message)
-                alert("クリップボードへのアクセスに失敗しました\n" + err)
-            })
-    }
+    // 問答無用でクリップボードにぶち込まれるので，カーソル変えて主張する
+    const css = `
+            <style>
+            yt-formatted-string#channel-id {
+                cursor: pointer;
+            }
+            yt-formatted-string#channel-handle {
+                cursor: pointer;
+            }
+            </style>`;
+    ( document.head || document.querySelector('head') ).insertAdjacentHTML('beforeend', css)
 
 
-    const logger = new class {
-        head = '[YT-Original-channel-ID]'
-        info(msg) {
-            console.info(this.head + ' ' + msg)
+    // ページ移動を検出します
+    let path = location.pathname
+    let channel_handle = ''
+    const observer = new MutationObserver(async function () {
+        if (path !== location.pathname) {
+            path = location.pathname
+
+            // チャンネルページ以外では実行しない
+            if (!location.pathname.startsWith('/@') && !location.pathname.startsWith('/channel')) {
+                return
+            }
+
+            const new_channel = location.pathname.startsWith('/@') ?
+                location.pathname.split('/')[1] :
+                location.pathname.split('/')[2]
+
+            if (channel_handle !== new_channel) {
+                channel_handle = new_channel
+                logger.debug('observer run')
+                await work()
+                logger.debug('init OK')
+            }
         }
-        log(msg) {
-            console.log(this.head + ' ' + msg)
-        }
-        warn(msg) {
-            console.warn(this.head + ' ' + msg)
-        }
-        error(msg) {
-            console.error(this.head + ' ' + msg)
+    })
+    observer.observe( (document.body || document.querySelector('body')), { childList: true, subtree: true })
+    logger.debug('observer start')
+
+    window.onload = async () => {
+        if (location.pathname.startsWith('/@') || location.pathname.startsWith('/channel')) {
+            await work()
         }
     }
 
