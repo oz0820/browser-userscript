@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.09.22.2
+// @version         2023.12.28.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -56,7 +56,7 @@
         iframeDoc.querySelector('th[style]').removeAttribute('style');
         iframeDoc.querySelector('table').querySelector('div').setAttribute('style', 'margin: 2px; width: 50px;')
         const table_height = iframeDoc.querySelector('table').clientHeight;
-        document.querySelector('iframe[class="akizuki_tools"]').setAttribute('style', `height: ${table_height+2}px;border: none;`);
+        document.querySelector('iframe[class="akizuki_tools"]').setAttribute('style', `height: ${table_height+20}px;border: none;`);
     }
 
 
