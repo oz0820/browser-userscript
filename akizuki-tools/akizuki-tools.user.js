@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.12.28.0
+// @version         2023.12.29.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -11,6 +11,33 @@
 
 
 (function() {
+
+    const stop_date = new Date('2024-01-25')
+    if (new Date() > stop_date) {
+        if (get_store('akizuki_tools_stop') === 'true') {
+            console.log('[Akizuki tools] 新サイト対応前です．コードを終了します．')
+            return;
+        }
+
+        const date = new Date();
+        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+        if (confirm('サイトリニューアルに対応するまでAkizuki toolsの動作を停止します．')) {
+            set_store('akizuki_tools_stop', 'true', date);
+            console.log('[Akizuki tools] 新サイト対応前です．コード終了用のCookieを書き込みました．')
+        }
+        console.log('[Akizuki tools] 新サイト対応前です．コードを終了します．')
+        return;
+    }
+
+
+    // 店舗指定のデフォルト値を設定
+    if (get_store('akizuki_tools_store') === '') {
+        const date = new Date();
+        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+        set_store('akizuki_tools_stop', 'akihabara', date);
+    }
+
+
     set_notification_container();
 
     if (!document.querySelector('h6')) {
@@ -45,7 +72,7 @@
     document.querySelector('div[class="detail_stocktitle_"]').insertAdjacentHTML('afterend', html);
 
     // デフォルトの店舗を変更する
-    const store_number = get_store() === 'yashio' ? 0 : get_store() === 'akihabara' ? 1 : 1;
+    const store_number = get_store('akizuki_tools_store') === 'yashio' ? 0 : get_store('akizuki_tools_store') === 'akihabara' ? 1 : 1;
     document.querySelector('select[id="akizuki_store_select"]').selectedIndex = store_number;
 
     document.querySelector('iframe[class="akizuki_tools"]').onload = () => {
@@ -75,7 +102,10 @@
 async function akizuki_tools(type) {
 
     let store = document.querySelector('select[id="akizuki_store_select"]').value;
-    set_store(store);
+
+    const date = new Date();
+    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+    set_store('akizuki_tools_store', store, date);
 
     if ("title" === type) {
         const item_name = document.querySelector('img[name="goods_l"]').getAttribute('alt');
@@ -172,15 +202,12 @@ function copy_to_clipboard(text) {
 }
 
 
-function set_store(store) {
-    const date = new Date();
-    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + date.toUTCString();
-    document.cookie = 'akizuki_tools_store' + "=" + store + "; " + expires + "; path=/";
+function set_store(name, store, expires) {
+    document.cookie = name + "=" + store + "; " + "expires=" + expires.toUTCString(); + "; path=/";
 }
 
-function get_store() {
-    const cookieName = "akizuki_tools_store=";
+function get_store(store_name) {
+    const cookieName = store_name + '=';
     const cookies = document.cookie.split(';');
     for (let i = 0; i < cookies.length; i++) {
         let cookie = cookies[i];
@@ -191,10 +218,7 @@ function get_store() {
             return cookie.substring(cookieName.length, cookie.length);
         }
     }
-
-    // Cookieが見つからない場合
-    set_store('akihabara');
-    return 'alohabara';
+    return '';
 }
 
 
