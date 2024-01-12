@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2024.01.08.0
+// @version         2024.01.13.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://twitter.com/*
@@ -112,48 +112,72 @@
 
     function add_ogp_twitter_pro() {
         const deck_work = (column) => {
-            column.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
-                try {
+            column.querySelectorAll('article[data-testid="tweet"]').forEach(tweet => {
+                tweet.querySelectorAll('a[rel="noopener noreferrer nofollow"][aria-label]').forEach(elm => {
+                    try {
 
-                    // 既に処理した要素は飛ばす
-                    if (elm.getAttribute('ogp') !== null) {
-                        return;
-                    }
-                    // 別のタグが紛れ込むことがあったり無かったり……
-                    if (!elm.getAttribute('href').startsWith('https://t.co/')) {
-                        return;
-                    }
+                        // 既に処理した要素は飛ばす
+                        if (elm.getAttribute('ogp') !== null) {
+                            return;
+                        }
+                        // 別のタグが紛れ込むことがあったり無かったり……
+                        if (!elm.getAttribute('href').startsWith('https://t.co/')) {
+                            return;
+                        }
 
-                    // 表示モードごとに色を変える
-                    let color = get_text_color();
+                        // 表示モードごとに色を変える
+                        let color = get_text_color();
 
-                    let href = elm.getAttribute('href');
-                    let fqdn = elm.querySelector('span').innerText;
-                    let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
+                        let href = elm.getAttribute('href');
+                        let fqdn = elm.getAttribute('aria-label').split(' ')[0];
+                        let fqdn_ok = false     // fqdnを取得できているかチェックして，その後要素を非表示にするか判断する
+                        try {
+                            new URL('https://' + fqdn);
+                            fqdn_ok = true;
+                        } catch (e) {
+                            console.error('ツイート内容のfqdn解析に失敗しました\n' + tweet)
+                        }
+                        let aria_label = elm.getAttribute('aria-label').slice(fqdn.length + 1);
 
-                    const insert_html =
-                        `<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-4rbku5 css-18t94o4 css-1dbjc4n r-1loqt21 r-18u37iz r-16y2uox r-1wtj0ep r-1ny4l3l r-o7ynqc r-6416eg">
+                        const insert_html =
+`<a href="${href}" rel="noopener noreferrer nofollow" target="_blank" role="link" class="css-175oi2r r-18u37iz r-16y2uox r-1wtj0ep r-o7ynqc r-6416eg r-1ny4l3l r-1loqt21">
     <div class="css-1dbjc4n r-16y2uox r-1wbh5a2 r-z5qs1h r-1777fci" data-testid="card.layoutLarge.detail">
         <div dir="auto" class="css-901oao css-1hf3ou5 r-37j5jr r-a023e6 r-16dba41 r-rjixqe r-bcqeeo r-qvutc0" style="${color.title}">
             <span class="css-901oao css-16my406 r-poiln3 r-bcqeeo r-qvutc0" ">${aria_label}</span>
         </div>
     </div>
 </a>`
-                    // 元々タイトルなどが埋め込まれていた場所はここらしい
-                    elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
+                        // 元々タイトルなどが埋め込まれていた場所はここらしい
+                        elm.parentElement.parentElement.children[1].insertAdjacentHTML('afterbegin', insert_html);
 
-                    // スタイルが変わってpaddingが効かなくなったので追加
-                    elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
+                        // スタイルが変わってpaddingが効かなくなったので追加
+                        elm.parentElement.parentElement.children[1].setAttribute('style', 'padding: 12px');
 
-                    // 編集済みのフラグ
-                    elm.setAttribute('ogp', '');
-                    // console.log('add OGP', elm);
+                        // ツイート内のfqdn表示とタイトルを削除
+                        if (fqdn_ok) {
+                            tweet.querySelectorAll('a[target="_blank"]').forEach(a => {
+                                // 対象の要素は中にテキストしか入っていないのでchildElementCountが0になる
+                                if (a.childElementCount === 0 && a.innerText.startsWith(fqdn)) {
+                                    a.style.display = 'none';
+                                }
+                            })
 
-                } catch (e) {
-                    // 一度エラーなら二度目もエラーなので、対象外に指定する
-                    console.log('error OGP', e, elm);
-                    elm.setAttribute('ogp', '');
-                }
+                            tweet.querySelectorAll('a > div[class="css-175oi2r r-1sd1n6o r-zye60e r-u8s1d r-1anhcgc"]')
+                                .forEach(a_title => {
+                                    a_title.style.display = 'none';
+                                })
+                        }
+
+                        // 編集済みのフラグ
+                        elm.setAttribute('ogp', '');
+                        // console.log('add OGP', elm);
+
+                    } catch (e) {
+                        // 一度エラーなら二度目もエラーなので、対象外に指定する
+                        console.log('error OGP', e, elm);
+                        elm.setAttribute('ogp', '');
+                    }
+                })
             })
         }
 
