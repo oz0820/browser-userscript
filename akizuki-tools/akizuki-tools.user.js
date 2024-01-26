@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2023.12.29.0
+// @version         2024.01.26.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -11,24 +11,8 @@
 
 
 (function() {
-
-    const stop_date = new Date('2024-01-25')
-    if (new Date() > stop_date) {
-        if (get_store('akizuki_tools_stop') === 'true') {
-            console.log('[Akizuki tools] 新サイト対応前です．コードを終了します．')
-            return;
-        }
-
-        const date = new Date();
-        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
-        if (confirm('サイトリニューアルに対応するまでAkizuki toolsの動作を停止します．')) {
-            set_store('akizuki_tools_stop', 'true', date);
-            console.log('[Akizuki tools] 新サイト対応前です．コード終了用のCookieを書き込みました．')
-        }
-        console.log('[Akizuki tools] 新サイト対応前です．コードを終了します．')
-        return;
-    }
-
+    // 新サイト対応まで全停止
+    return
 
     // 店舗指定のデフォルト値を設定
     if (get_store('akizuki_tools_store') === '') {
