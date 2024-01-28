@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2024.01.28.0
+// @version         2024.01.29.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -12,16 +12,17 @@
 
 (function() {
 
-    const stockAkihabara = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(1) > td:nth-child(2)').innerText.trim()
+    const stockAkihabara = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(1) > td:nth-child(2)').innerText.trim().replace(/\D/g, '')
     const floorAkihabara = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(1) > td:nth-child(3)').innerText.trim()
-    const stockYashio = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(2) > td:nth-child(2)').innerText.trim()
+    const stockYashio = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(2) > td:nth-child(2)').innerText.trim().replace(/\D/g, '')
     const floorYashio = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(2) > td:nth-child(3)').innerText.trim()
 
     // console.log('akiba', stockAkihabara, floorAkihabara)
     // console.log('yashio', stockYashio, floorYashio)
 
+const showStocks = () => {
     const stockElm =
-`<table style="margin-left: 10px;">
+`<table style="margin-left: 20px;">
     <tbody>
     <tr>
         <td style="width: 60px;text-align: left;">
@@ -43,9 +44,16 @@
     </tbody>
 </table>`
 
-
     document.querySelector("#SalesArea > div > div.block-goods-detail-store-stock")
         .insertAdjacentHTML('beforeend', stockElm)
+}
+    showStocks()
+
+    const observer = new MutationObserver(function (e) {
+        showStocks()
+    })
+    observer.observe(document.querySelector('#SalesArea'), {childList: true})
+
 
     // 新サイト対応まで停止
     return;
