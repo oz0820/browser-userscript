@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2024.01.26.0
+// @version         2024.01.28.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -11,8 +11,44 @@
 
 
 (function() {
-    // 新サイト対応まで全停止
-    return
+
+    const stockAkihabara = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(1) > td:nth-child(2)').innerText.trim()
+    const floorAkihabara = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(1) > td:nth-child(3)').innerText.trim()
+    const stockYashio = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(2) > td:nth-child(2)').innerText.trim()
+    const floorYashio = document.querySelector('div.block-goods-detail-store-stock-tbl tbody > tr:nth-child(2) > td:nth-child(3)').innerText.trim()
+
+    // console.log('akiba', stockAkihabara, floorAkihabara)
+    // console.log('yashio', stockYashio, floorYashio)
+
+    const stockElm =
+`<table style="margin-left: 10px;">
+    <tbody>
+    <tr>
+        <td style="width: 60px;text-align: left;">
+            秋葉原
+        </td>
+        <td style="text-align: right;">
+            ${stockAkihabara}
+        </td>
+    </tr>
+
+    <tr>
+        <td style="text-align: left;">
+            八潮
+        </td>
+        <td style="text-align: right;">
+            ${stockYashio}
+        </td>
+    </tr>
+    </tbody>
+</table>`
+
+
+    document.querySelector("#SalesArea > div > div.block-goods-detail-store-stock")
+        .insertAdjacentHTML('beforeend', stockElm)
+
+    // 新サイト対応まで停止
+    return;
 
     // 店舗指定のデフォルト値を設定
     if (get_store('akizuki_tools_store') === '') {
