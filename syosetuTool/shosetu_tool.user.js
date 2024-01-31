@@ -2,7 +2,7 @@
 // @name         Syosetu Tool
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.12.07.1
+// @version      2024.01.31.0
 // @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match        https://ncode.syosetu.com/*
 // @match        https://novelpia.jp/viewer/*
@@ -48,40 +48,56 @@
         }
 
         async _update() {
-            const fetch_url = `https://ncode.syosetu.com/${this.ncode}/`;
+            // 100話を超えたら全話リストが分割されるようになったらしい
+            // 一覧ページの数は閲覧ページ上の話数表示から引っ張る
+            const last_page_count = !!document.querySelector('#novel_no') ?
+                Math.ceil(Number(document.querySelector('#novel_no').innerText.split('/')[1]) / 100) :
+                1
 
-            this.novel_data =
-                await fetch(fetch_url)
-                    .then(res => {
-                        return res.text()
-                    })
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        let novel_data = {};
-
-                        doc.querySelectorAll('div.index_box > dl.novel_sublist2').forEach(elm => {
-
-                            novel_data[elm.querySelector('a').href.split('/')[4]] = {
-                                'novel_no': Number(elm.querySelector('a').href.split('/')[4]),
-                                'novel_no_str': elm.querySelector('a').href.split('/')[4],
-                                'subtitle': elm.querySelector('a').innerText.trim(),
-                                'long_update_str': elm.querySelector('.long_update').textContent.trim()
-                                    .match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0],
-                                'revision_update_str': elm.querySelector('dt > span') ?
-                                    elm.querySelector('dt > span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
-                                    null
-                            }
+            // 100件ごとに取得して最後に合体する
+            const novel_data_list = []
+            for (let i=1; i<= last_page_count; i++) {
+                const fetch_url = `https://ncode.syosetu.com/${this.ncode}/?p=${i}`
+                console.log('fetch url', fetch_url)
+                novel_data_list.push(
+                    await fetch(fetch_url)
+                        .then(res => {
+                            return res.text()
                         })
-                        novel_data['_last_update'] = Math.floor(new Date().getTime() / 1000)
-                        novel_data['ncode'] = this.ncode;
-                        return novel_data;
+                        .then(html => {
+                            const parser = new DOMParser()
+                            const doc = parser.parseFromString(html, 'text/html')
+                            let novel_data = {}
 
-                    })
-                    .catch(error => {
-                        console.error('データの取得に失敗しました', error);
-                        return {'_last_update': 0, 'ncode': this.ncode};
-                    });
+                            doc.querySelectorAll('div.index_box > dl.novel_sublist2').forEach(elm => {
+
+                                novel_data[elm.querySelector('a').href.split('/')[4]] = {
+                                    'novel_no': Number(elm.querySelector('a').href.split('/')[4]),
+                                    'novel_no_str': elm.querySelector('a').href.split('/')[4],
+                                    'subtitle': elm.querySelector('a').innerText.trim(),
+                                    'long_update_str': elm.querySelector('.long_update').textContent.trim()
+                                        .match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0],
+                                    'revision_update_str': elm.querySelector('dt > span') ?
+                                        elm.querySelector('dt > span').title.trim().match(/\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}/)[0] :
+                                        null
+                                }
+                            })
+                            novel_data['_last_update'] = Math.floor(new Date().getTime() / 1000)
+                            novel_data['ncode'] = this.ncode
+                            return novel_data
+
+                        })
+                        .catch(error => {
+                            console.error('データの取得に失敗しました', error)
+                            return {'_last_update': 0, 'ncode': this.ncode}
+                        })
+                )
+            }
+
+            // 別れたdictデータを合体
+            this.novel_data = novel_data_list.reduce((accumulator, current) => {
+                return { ...accumulator, ...current }
+            }, {})
 
             await this._write()
         }
