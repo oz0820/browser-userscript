@@ -1,7 +1,8 @@
 # Akizuki tools
 ## 説明
-秋月電子通商の商品ページの内容をクリップボードにコピーするボタンを追加します。  
-ついでに店舗在庫も表示します。  
+秋月電子通商の商品ページに店舗在庫の情報を表示する機能と，その情報をクリップボードにコピーする機能を追加します．
+また，製品名をクリックするとクリップボードに製品名がコピーされます．    
+
 GoogleのToDoリストと併用するととても便利です。  
 
 コピーされるテキストの例  
@@ -15,8 +16,10 @@ I-14051
 1F 10 売場 キャビネット上段
 https://akizukidenshi.com/catalog/g/gI-14051/
 ```
-追加される要素のイメージ  
-![ToolDisplayExample](https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img01.png)
+
+[//]: # (追加される要素のイメージ  )
+
+[//]: # (![ToolDisplayExample]&#40;https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img01.png&#41;)
 
 Google ToDoに登録するとこんな感じ  
 ![GoogleTodoImage1](https://github.com/oz0820/browser-userscript/blob/images/akizuki-tools/img02.png)
