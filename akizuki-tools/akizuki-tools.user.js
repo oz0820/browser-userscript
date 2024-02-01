@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Akizuki tools
 // @namespace       https://twitter.com/oz0820
-// @version         2024.01.31.0
+// @version         2024.02.01.0
 // @description     秋月電子通商の商品ページをカスタマイズします。店頭在庫を常に表示する機能と、商品詳細をGoogle Todoに貼り付けやすい形式のテキストを提供します。
 // @author          oz0820
 // @match           https://akizukidenshi.com/catalog/g/*
@@ -70,17 +70,27 @@
     showStocks()
 
     // 商品の入り数？をクリックすると挿入した要素が消える
-    // そこで，要素の変更を監視して再描画する
+    // そこで，要素の変更を監視して再表示する
     const observer = new MutationObserver(function () {
         showStocks()
     })
     observer.observe(document.querySelector('#SalesArea'), {childList: true})
 
-    // 製品名をクリックしてコピーする機能
+    // 製品名をクリックしてコピーする
+    // 200ms以内にクリックすれば押した判定、それ以外は型番などを選択中と判断
     document.querySelector('h1.h1-goods-name').style.cursor = 'pointer'
-    document.querySelector('h1.h1-goods-name').addEventListener('click', function (e) {
-        copyToClipboard(e.target.innerText)
-        createNotification('製品名をコピーしました')
+    let h1ClickTime // マウスを押した時刻を格納
+    document.querySelector('h1.h1-goods-name').addEventListener('mousedown', function (e) {
+        h1ClickTime = new Date().getTime()
+    })
+    document.querySelector('h1.h1-goods-name').addEventListener('mouseup', function (e) {
+        const h1ReleaseTime = new Date().getTime()
+        // マウスを押してから放すまでの時間が200msを超えているか判定
+        const CLICK_THRESHOLD = 200
+        if (h1ReleaseTime - h1ClickTime < CLICK_THRESHOLD) {
+            copyToClipboard(e.target.innerText)
+            createNotification('製品名をコピーしました')
+        }
     })
 
 
