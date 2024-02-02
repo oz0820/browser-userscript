@@ -1,15 +1,16 @@
 // ==UserScript==
-// @name         Syosetu Tool
-// @namespace    https://twitter.com/oz0820
-// @author       oz0820
-// @version      2024.01.31.0
-// @description  小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
-// @match        https://ncode.syosetu.com/*
-// @match        https://novelpia.jp/viewer/*
-// @match        https://novelpink.jp/viewer/*
-// @match        https://kakuyomu.jp/*
-// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/syosetuTool/shosetu_tool.user.js
-// @icon         https://syosetu.com/favicon.ico
+// @name            Syosetu Tool
+// @namespace       https://twitter.com/oz0820
+// @author          oz0820
+// @version         2024.02.02.0
+// @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
+// @match           https://ncode.syosetu.com/*
+// @match           https://novel18.syosetu.com/*
+// @match           https://novelpia.jp/viewer/*
+// @match           https://novelpink.jp/viewer/*
+// @match           https://kakuyomu.jp/*
+// @updateURL       https://github.com/oz0820/browser-userscript/raw/main/syosetuTool/shosetu_tool.user.js
+// @icon            https://syosetu.com/favicon.ico
 // ==/UserScript==
 
 (function() {
@@ -57,7 +58,7 @@
             // 100件ごとに取得して最後に合体する
             const novel_data_list = []
             for (let i=1; i<= last_page_count; i++) {
-                const fetch_url = `https://ncode.syosetu.com/${this.ncode}/?p=${i}`
+                const fetch_url = `${location.origin}/${this.ncode}/?p=${i}`
                 console.log('fetch url', fetch_url)
                 novel_data_list.push(
                     await fetch(fetch_url)
@@ -150,7 +151,7 @@
         // ショートカットキー周り
         document.addEventListener('keydown', function(e) {
             // 一覧ページとかで発動されると困るので
-            if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
+            if (!location.href.match(/https:\/\/(ncode|novel18).syosetu.com\/n\d+[a-z]+\/\d+/)) {
                 return;
             }
 
@@ -254,10 +255,10 @@
 
          /* 小説の詳細を表示するやつ */
 
-        if (!location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)) {
+        if (!location.href.match(/https:\/\/(ncode|novel18).syosetu.com\/n\d+[a-z]+\/\d+/)) {
             return;
         }
-        if (location.href.match(/https:\/\/ncode.syosetu.com\/n\d+[a-z]+\/\d+/)[0] + '/' !== location.href) {
+        if (location.href.match(/https:\/\/(ncode|novel18).syosetu.com\/n\d+[a-z]+\/\d+/)[0] + '/' !== location.href) {
             return;
         }
 
@@ -291,19 +292,21 @@
             </style>`
         document.head.insertAdjacentHTML('beforeend', style_elm);
 
-        const episode_number = Number(location.href.split('/')[4]);
+        // novel18の方は要素が一つズレるので、セレクターにオフセットを掛ける
+        const isR18 = document.querySelector('div.contents1 > span:nth-child(1)')?.innerText === 'R18';
+        const selectorOffset = isR18 ? 1 : 0;
 
-        const novel_title = document.querySelector('div.contents1 > a:nth-child(1)').innerText.trim();
-        const novel_page_url = document.querySelector('div.contents1 > a:nth-child(1)').href;
+        const episode_number = Number(location.href.split('/')[4]);
+        const novel_title = document.querySelector(`div.contents1 > a:nth-child(${1 + selectorOffset})`).innerText.trim();
+        const novel_page_url = document.querySelector(`div.contents1 > a:nth-child(${1 + selectorOffset})`).href;
         const novel_no_str = document.querySelector('div#novel_no').innerText.trim();
-        const novel_writername = (document.querySelector('div.contents1 > a:nth-child(2)') || {}).innerText?.trim() || (() => {
+        const novel_writername = (document.querySelector(`div.contents1 > a:nth-child(${2 + selectorOffset})`) || {}).innerText?.trim() || (() => {
             const contents = document.querySelector('div.contents1').innerText.trim();
             const authorIndex = contents.lastIndexOf('作者：');
             return authorIndex !== -1 ? contents.substring(authorIndex + 3).trim() : '??????';
         })();
-
-        const novel_writer_url = document.querySelector('div.contents1 > a:nth-child(2)') ?
-            document.querySelector('div.contents1 > a:nth-child(2)').href :
+        const novel_writer_url = document.querySelector(`div.contents1 > a:nth-child(${2 + selectorOffset})`) ?
+            document.querySelector(`div.contents1 > a:nth-child(${2 + selectorOffset})`).href :
             null;
         const chapter_title =  document.querySelector('div.contents1 > p') ?
             document.querySelector('div.contents1 > p').innerText.trim() :
@@ -647,7 +650,7 @@
 
 
     const hostname = location.hostname;
-    if ('ncode.syosetu.com' === hostname) {
+    if ('ncode.syosetu.com' === hostname || 'novel18.syosetu.com' === hostname) {
         syosetu();
         if (location.pathname.startsWith('/txtdownload/')) {
             syosetu_txt_download()
