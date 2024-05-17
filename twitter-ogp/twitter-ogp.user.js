@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2024.05.17.0
+// @version         2024.05.17.1
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
 // @match           https://x.com/*
@@ -13,7 +13,7 @@
 
 (function () {
 
-    if (location.hostname === 'twitter.com') {
+    if (location.hostname === 'twitter.com' || location.hostname === 'x.com') {
         setInterval(add_ogp_twitter, 500);
 
         const css = `<style>article[data-testid="tweet"] a[rel="noopener noreferrer nofollow"] { text-decoration: none; }</style>`;

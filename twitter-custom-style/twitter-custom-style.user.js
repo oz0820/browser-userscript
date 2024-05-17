@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Twitter custom style
 // @namespace       https://twitter.com/oz0820
-// @version         2024.05.17.0
+// @version         2024.05.17.1
 // @description     Twitterにオレオレスタイルを適用します．
 // @author          oz0820
 // @grant           GM.setValue
@@ -74,7 +74,8 @@
     const selector = {
         'tweetdeck.twitter.com': 'div[class="css-1dbjc4n r-1pi2tsx r-11yh6sk r-buy8e9 r-bnwqim r-13qz1uu"]',
         'pro.twitter.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]',
-        'twitter.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]'
+        'twitter.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]',
+        'x.com': 'div[class="css-175oi2r r-1pi2tsx r-11yh6sk r-buy8e9 r-13qz1uu"]'
     }
     let path = location.pathname
     const observer = new MutationObserver(async function (e) {
