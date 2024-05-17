@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name            Twitter OGP
 // @namespace       https://twitter.com/oz0820
-// @version         2024.01.13.0
+// @version         2024.05.17.0
 // @description     TwitterのOGPタイトルなどを復活させます
 // @author          oz0820
+// @match           https://x.com/*
 // @match           https://twitter.com/*
 // @match           https://pro.twitter.com/*
 // @updateURL       https://github.com/oz0820/browser-userscript/raw/main/twitter-ogp/twitter-ogp.user.js

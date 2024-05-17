@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name            Twitter custom style
 // @namespace       https://twitter.com/oz0820
-// @version         2023.12.13.0
+// @version         2024.05.17.0
 // @description     Twitterにオレオレスタイルを適用します．
 // @author          oz0820
 // @grant           GM.setValue
 // @grant           GM.getValue
+// @match           https://x.com/*
 // @match           https://twitter.com/*
 // @match           https://tweetdeck.twitter.com/*
 // @match           https://pro.twitter.com/*
