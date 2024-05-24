@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2023.12.10.0
+// @version      2024.05.24.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -17,11 +17,8 @@
         if (href !== window.location.href) {
             href = window.location.href;
 
-            if (location.href.startsWith('https://www.youtube.com/')) {
-                replace_special_logo();
-            }
-
-            if (location.href.startsWith('https://www.youtube.com/watch')) {
+            if (location.href.startsWith('https://www.youtube.com/watch') ||
+                location.href.startsWith('https://www.youtube.com/live')) {
                 title_font_replace();
             }
 
@@ -77,16 +74,6 @@
         }
     }
 
-    function replace_special_logo() {
-        window.onload = () => {
-            document.querySelectorAll('a#logo.ytd-topbar-logo-renderer').forEach(elm => {
-                elm.href = '/';
-            });
-            document.querySelectorAll('#big-yoodle').forEach(elm => {
-                elm.remove();
-            })
-        }
-    }
 
     // ダークテーマの背景を真っ黒にする
     function background_color_changer() {
