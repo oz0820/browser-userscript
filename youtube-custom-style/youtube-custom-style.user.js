@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.05.24.0
+// @version      2024.05.24.1
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -13,7 +13,7 @@
 
     // ページ移動を検出します
     let href = window.location.href;
-    const observer = new MutationObserver(async function () {
+    const observer = new MutationObserver(function () {
         if (href !== window.location.href) {
             href = window.location.href;
 
@@ -28,7 +28,6 @@
 
     // 初回実行
     background_color_changer();
-    replace_special_logo();
 
     // ライブチャットのハートマークが邪魔なので
     const style_elm =
@@ -46,24 +45,24 @@
     }
 
     // 動画タイトルのフォントが重すぎてイヤなので、過去のスタイルに戻す
-    `
-    h1.ytd-watch-metadata {
-        word-break: break-word;
-        font-family: "YouTube Sans","Roboto",sans-serif;
-        font-size: 18px;
-        line-height: 2.8rem;
-        font-weight: 400;
-        overflow: hidden;
-        display: block;
-        max-height: 5.6rem;
-        -webkit-line-clamp: 2;
-        display: box;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        text-overflow: ellipsis;
-        white-space: normal;
-    }
-    `
+
+    // ytd-watch-metadata[title-headline-xs] h1.ytd-watch-metadata {
+    //     word-break: break-word;
+    //     font-family: "YouTube Sans","Roboto",sans-serif;
+    //     font-size: 18px;
+    //     line-height: 2.8rem;
+    //     font-weight: 400;
+    //     overflow: hidden;
+    //     display: block;
+    //     max-height: 5.6rem;
+    //     -webkit-line-clamp: 2;
+    //     display: box;
+    //     display: -webkit-box;
+    //     -webkit-box-orient: vertical;
+    //     text-overflow: ellipsis;
+    //     white-space: normal;
+    // }
+
     // タイトルを読み込むまで良い感じにループしながら待機する
     function title_font_replace() {
         let target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
