@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.26.0
+// @version      2024.05.26.0
 // @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -29,8 +29,13 @@
     observer.observe(document, { childList: true, subtree: true });
 
     function set_url() {
-        let param_search = new URLSearchParams(window.location.search);
-        let video_id = param_search.get('v');
+        let video_id
+        if (window.location.pathname.startsWith('/live/')) {
+            video_id = window.location.pathname.split('/')[2];
+        } else {
+            let param_search = new URLSearchParams(window.location.search);
+            video_id = param_search.get('v');
+        }
         if (video_id == null) {
             return;
         }
