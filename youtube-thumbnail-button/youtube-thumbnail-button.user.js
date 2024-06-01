@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2024.06.02.0
+// @version      2024.06.02.1
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -51,6 +51,9 @@
             "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",
             "https://i.ytimg.com/vi/" + video_id + "/0.jpg"
         ];
+
+        // 何故かCORSで怒られることがあるので、とりあえず最高画質のURLを指定する
+        tvm.update(urls[0])
         const check_urls = async urls => {
             const results = [];
             for (const url of urls) {
