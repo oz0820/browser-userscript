@@ -1,34 +1,40 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2024.05.26.0
-// @description  Youtubeの再生ウィンドウにサムネイル直行ボタンを追加すると思います。
+// @version      2024.06.02.0
+// @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-thumbnail-button/youtube-thumbnail-button.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
 
-(function () {
-    let thumbnail_url = "";
-    let thumbnail_ok = false;
-    let href = window.location.href;
 
-    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+(async function () {
+    function logger(...message) {
+        let out = ""
+        for (let i = 0; i < message.length; i++) {
+            out += String(message[i])
+            out += " "
+        }
+        console.log("【YTB】", out)
+    }
 
-    // ページ移動を検出します
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+    let href = window.location.href
     const observer = new MutationObserver(function () {
         if (href !== window.location.href) {
             href = window.location.href;
             // 処理
             logger("URL Changed.");
-            thumbnail_ok = false;
-            set_extended_thumbnail();
+            set_thumbnail_url()
         }
     })
     observer.observe(document, { childList: true, subtree: true });
 
-    function set_url() {
+    // pathnameからvidを抽出して、有効なサムネイルURLを取得する
+    const set_thumbnail_url = () => {
         let video_id
         if (window.location.pathname.startsWith('/live/')) {
             video_id = window.location.pathname.split('/')[2];
@@ -45,118 +51,88 @@
             "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",
             "https://i.ytimg.com/vi/" + video_id + "/0.jpg"
         ];
-        logger("check", thumbnail_url);
-        check_urls(urls).then(r => {
+        const check_urls = async urls => {
+            const results = [];
+            for (const url of urls) {
+                results.push(fetch(url));
+            }
+            return Promise.all(results);
+        }
+
+        check_urls(urls).then(async r => {
             for (let i = 0; i < r.length; i++) {
                 logger("check", urls[i]);
                 if (r[i].status === 200) {
                     logger("OK", urls[i]);
-                    thumbnail_url = urls[i];
-                    thumbnail_ok = true;
+                    await tvm.update(urls[i])
                     return;
                 }
             }
         });
     }
 
-    async function check_urls(urls) {
-        const results = [];
-        for (const url of urls) {
-            results.push(fetch(url));
-        }
-        return Promise.all(results);
-    }
+    class thumbnail_view_manager {
+        url = null
+        secondary_renderer = null
+        extended_thumbnail_img = null
+        extended_thumbnail_frame = null
 
-    // 関連動画の上にサムネを埋め込みます
-    function set_extended_thumbnail() {
-        set_url();
-        // サムネのURLが確定するまで待ちます
-        run();
-        async function run() {
-            for (let i = 0; i < 100; i++) {
-                if (thumbnail_ok) {
-                    try {
-                        document.querySelector('img#extended_thumbnail.ytd-extended-thumbnail').src = thumbnail_url;
-                        document.querySelector('a.ytd-extended-thumbnail.wrapper').href = thumbnail_url;
-                    } catch (e) {
-                        for (let elm of document.querySelectorAll('.ytd-extended-thumbnail')) {
-                            elm?.remove();
-                        }
-                        let elm = document.querySelector('ytd-watch-next-secondary-results-renderer');
-                        let html =
-                            `<a class="ytd-extended-thumbnail wrapper" href="${thumbnail_url}" target="_blank">
-                                <img src="${thumbnail_url}" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" alt="extended_thumbnail" title="新しいタブで開く">
-                            </a>`;
-                        // 非ログイン状態だと関連動画と合体してしまうので、1行改行を入れる
-                        if (document.getElementsByTagName('yt-related-chip-cloud-renderer').length === 0) {
-                            html += '<br>';
-                        }
-                        elm.insertAdjacentHTML('afterbegin', html);
+        async init() {
+            await this._reset_img_frame()
+        }
+
+        async update(url) {
+            this.url = url
+            try {
+                if (this.extended_thumbnail_img.clientWidth === 0) {
+                    logger('ERROR _reset_img')
+                    await this.init()
+                }
+
+                this.extended_thumbnail_frame.href = url
+                // logger('Update extended_thumbnail_frame')
+                this.extended_thumbnail_img.src = url
+                // logger('Update extended_thumbnail_img')
+            } catch (e) {
+                logger('ERROR _reset_img')
+                await this._reset_img_frame()
+                await this.update(url)
+            }
+        }
+
+        async _reset_img_frame() {
+            while (true) {
+                const secondary_renderer = document.querySelector('ytd-watch-next-secondary-results-renderer')
+                if (secondary_renderer === null) {
+                    await sleep(100)
+                } else {
+                    if (secondary_renderer.clientHeight !== 0) {
+                        this.secondary_renderer = secondary_renderer
+                        break
+                    } else {
+                        await sleep(100)
                     }
-                    break;
                 }
-                await sleep(100);
             }
+
+            logger('get secondary_renderer')
+
+            this.secondary_renderer.querySelectorAll('a.ytd-extended-thumbnail').forEach(e => {
+                e.remove()
+            })
+            let html =
+                `<a class="ytd-extended-thumbnail wrapper" href="" target="_blank">
+                    <img src="" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 10px" alt="extended_thumbnail" title="新しいタブで開く">
+                </a>`
+
+            this.secondary_renderer.insertAdjacentHTML('afterbegin', html)
+
+            this.extended_thumbnail_frame = document.querySelector('a.ytd-extended-thumbnail')
+            this.extended_thumbnail_img = document.querySelector('a.ytd-extended-thumbnail > img#extended_thumbnail')
         }
     }
 
-    async function init() {
-        const my_style =
-            `<style>
-                .ytd-extended-thumbnail {
-                    border-radius: 15px;
-                }
-                img#extended_thumbnail.ytd-extended-thumbnail {
-                    width: 100%;
-                    height: auto
-                }
-            </style>`;
-        ( document.head || document.querySelector('head') )?.insertAdjacentHTML('beforeend', my_style)
-
-        for (let i = 0; i < 50; i++) {
-            try {
-                // 雑にボタン追加します
-                let html = '' +
-                    '<button class="ytp-thumbnail-button ytp-button" id="show_thumbnail_button" aria-label="サムネイルを表示する" title="サムネイルを表示する">' +
-                        '<svg class="ytp-thumbnail-button-icon" height="100%" width="100%" viewBox="-8 -8 32 32" fill-opacity="1">' +
-                            '<path fill="#fff" d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />' +
-                            '<path fill="#fff" d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z" />' +
-                        '</svg>' +
-                    '</button>';
-
-                document.getElementsByClassName('ytp-right-controls')[0].insertAdjacentHTML('afterbegin', html);
-                break;
-            } catch (e) {
-                // なんもしないです
-            }
-            await sleep(100);
-        }
-        for (let i = 0; i < 50; i++) {
-            try {
-                // 新しいタブでビデオIDをねじ込んだサムネURLを開きます
-                document.getElementById('show_thumbnail_button').addEventListener('click', function () {
-                    window.open(thumbnail_url);
-                });
-            } catch (e) {
-                // なんもしないです
-            }
-            await sleep(100);
-        }
-
-        // サムネイルを埋め込みます
-        set_extended_thumbnail();
-    }
-    init();
-
-    function logger(...message) {
-        let out = "";
-        for (let i = 0; i < message.length; i++) {
-            out += String(message[i]);
-            out += " ";
-        }
-        console.log("【YTB】", out);
-    }
-
+    const tvm = new thumbnail_view_manager()
+    await tvm.init()
+    set_thumbnail_url()
 })();
-
-
