@@ -2,32 +2,35 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.05.24.1
+// @version      2024.06.02.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
 
-(function() {
+(async function () {
 
     // ページ移動を検出します
     let href = window.location.href;
-    const observer = new MutationObserver(function () {
+    const observer = new MutationObserver(async function () {
         if (href !== window.location.href) {
             href = window.location.href;
 
             if (location.href.startsWith('https://www.youtube.com/watch') ||
                 location.href.startsWith('https://www.youtube.com/live')) {
                 title_font_replace();
+                console.log('aheujgheauih')
+                await chat()
             }
-
         }
     })
-    observer.observe(document, { childList: true, subtree: true });
+    observer.observe(document, {childList: true, subtree: true});
+    const sleep = async ms => new Promise(res => setTimeout(res, ms));
 
     // 初回実行
     background_color_changer();
+    await chat()
 
     // ライブチャットのハートマークが邪魔なので
     const style_elm =
@@ -73,6 +76,17 @@
         }
     }
 
+    // チャットを自動で表示する
+    async function chat() {
+        for (let i = 0; i < 20; i++) {
+            document.querySelector('div#chat-container yt-button-shape > button')?.click()
+            await sleep(100)
+            if (document.querySelector('div#chat-container yt-button-shape > button')?.clientHeight === 0) {
+                break
+            }
+        }
+    }
+
 
     // ダークテーマの背景を真っ黒にする
     function background_color_changer() {
@@ -80,7 +94,6 @@
         const after_style = before_style.replaceAll('--yt-spec-base-background: #0f0f0f', '--yt-spec-base-background: #000000');
         document.querySelector('style[css-build-single]').textContent = after_style;
     }
-
 
 
 })();
