@@ -1,6 +1,7 @@
 # Youtube chat mode changer
 
-Youtubeのチャットのリプレイを常に全て表示します．
+- Youtubeのチャットのリプレイを常に全て表示します。
+- チャットを常に開きます。
 
 
 ### インストール
