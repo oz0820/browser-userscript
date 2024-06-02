@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.06.02.0
+// @version      2024.06.02.1
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -20,13 +20,10 @@
             if (location.href.startsWith('https://www.youtube.com/watch') ||
                 location.href.startsWith('https://www.youtube.com/live')) {
                 title_font_replace();
-                console.log('aheujgheauih')
-                await chat()
             }
         }
     })
     observer.observe(document, {childList: true, subtree: true});
-    const sleep = async ms => new Promise(res => setTimeout(res, ms));
 
     // 初回実行
     background_color_changer();
@@ -75,18 +72,6 @@
             setTimeout(() => title_font_replace(), 200);
         }
     }
-
-    // チャットを自動で表示する
-    async function chat() {
-        for (let i = 0; i < 20; i++) {
-            document.querySelector('div#chat-container yt-button-shape > button')?.click()
-            await sleep(100)
-            if (document.querySelector('div#chat-container yt-button-shape > button')?.clientHeight === 0) {
-                break
-            }
-        }
-    }
-
 
     // ダークテーマの背景を真っ黒にする
     function background_color_changer() {

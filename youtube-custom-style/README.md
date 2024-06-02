@@ -7,7 +7,6 @@ YouTubeのスタイルを好き勝手に弄ります。
 - ダークテーマの背景を完全な黒にする
 - ライブチャットのハートマークを6割くらい透過してコメントを読みやすくする
 - ハートマークを上に50px移動させて，最新コメントの三点メニューを押せるようにする
-- チャットを自動で開く
 
 ![youtube-custom-style_01.gif](https://raw.githubusercontent.com/oz0820/browser-userscript/images/youtube-custom-style/youtube-custom-style_01.gif)
 
