@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.06.02.2
+// @version      2024.06.17.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -62,14 +62,15 @@
     //     white-space: normal;
     // }
 
-    // タイトルを読み込むまで良い感じにループしながら待機する
     function title_font_replace() {
         let target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
-        if (target_elm) {
-            target_elm.style = 'font-size: 18px; font-weight: 400;';
-        } else {
-            setTimeout(() => title_font_replace(), 200);
-        }
+        const css = `
+        <style>
+            div#title > h1 {
+                font-weight: 400;
+            }
+        </style>`
+        document.head.insertAdjacentHTML('beforeend', css)
     }
 
     // ダークテーマの背景を真っ黒にする
