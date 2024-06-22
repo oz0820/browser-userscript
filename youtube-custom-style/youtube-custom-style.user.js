@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.06.22.3
+// @version      2024.06.22.4
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -58,7 +58,9 @@
                 font-weight: 400;
                 font-size: 2rem;
             }
-        </style>`
+        </style>
+        <link href="https://fonts.googleapis.com/css?family=YouTube+Sans&display=swap" rel="stylesheet">
+        `
         document.head.insertAdjacentHTML('beforeend', css);
     }
 
