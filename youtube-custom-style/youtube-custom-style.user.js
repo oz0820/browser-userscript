@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.06.22.1
+// @version      2024.06.22.2
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -40,10 +40,21 @@
 
     const func_top = () => {
         // 動画タイトルのフォントを軽くする
-        let target_elm = document.querySelector('h1.style-scope.ytd-watch-metadata');
+        const titleElm = document.querySelector('div#title > h1');
+        if (!!titleElm) {
+            if ('400' === window.getComputedStyle(titleElm).fontWeight) {
+                // スタイルが適用されているので終了
+                return;
+            }
+        }
+
+
+        window.getComputedStyle(document.querySelector('div#title > h1')).fontWeight
+
         const css = `
         <style>
             div#title > h1 {
+                font-family: "YouTube Sans";
                 font-weight: 400;
                 font-size: 2rem;
             }
