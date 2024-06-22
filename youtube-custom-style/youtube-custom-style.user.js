@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.06.22.0
+// @version      2024.06.22.1
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -45,6 +45,7 @@
         <style>
             div#title > h1 {
                 font-weight: 400;
+                font-size: 2rem;
             }
         </style>`
         document.head.insertAdjacentHTML('beforeend', css);
