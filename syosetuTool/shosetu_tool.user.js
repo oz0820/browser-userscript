@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2024.02.02.0
+// @version         2024.07.1.0
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -195,7 +195,7 @@
                 window.scroll(window.scrollX, window.scrollY+100);
 
             // しおりをクリック
-            } else if (e.code === "ShiftRight") {
+            } else if (e.code === "ShiftRight" || e.code === "Enter") {
                 if (document.querySelector('li.bookmark_now.set_siori')) {
                     const siori_button = document.querySelector('input[name="siori_url"]');
                     siori_button.click();
