@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2024.07.1.0
+// @version         2024.07.25.0
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -156,37 +156,20 @@
             }
 
             // 移動ボタンを取得する
-            let before_button, after_button;
-            if (document.querySelector('div.novel_bn').children.length === 2) {
-                before_button = document.querySelector('div.novel_bn > a:nth-child(1)');
-                after_button = document.querySelector('div.novel_bn > a:nth-child(2)');
-            } else {
-                if (document.querySelector('div.novel_bn > a:nth-child(1)').innerText.search('<') !== -1) {
-                    before_button = document.querySelector('div.novel_bn > a:nth-child(1)');
-                    after_button = null;
-                } else {
-                    before_button = null;
-                    after_button = document.querySelector('div.novel_bn > a:nth-child(1)');
-                }
-            }
+            const before_button = document.querySelector('div.novel_bn > a.novelview_pager-before');
+            const after_button = document.querySelector('div.novel_bn > a.novelview_pager-next');
 
             // 次のページに進む
             if (e.code === "ControlRight" || e.code === "ControlLeft") {
-                if (after_button) {
-                    after_button.click();
-                }
+                after_button?.click();
 
             // 次のページに進む
             } else if (e.code === "ArrowRight") {
-                if (after_button) {
-                    after_button.click();
-                }
+                after_button?.click();
 
             // 前のページに進む
             } else if (e.code === "ArrowLeft") {
-                if (before_button) {
-                    before_button.click();
-                }
+                before_button?.click();
 
             // 高速スクロールしたい
             } else if (e.code === "ArrowUp") {
