@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.08.08.0
+// @version      2024.08.09.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -25,6 +25,7 @@
     // })
     // observer.observe(document, {childList: true, subtree: true});
 
+    const policy = trustedTypes.createPolicy('default', {createHTML: (string) => string,})
 
     const func_live_chat = () => {
         // ライブチャットのハートマークが邪魔なので
@@ -34,7 +35,7 @@
                 yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model { opacity: 0.4; }
                 yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model:hover { opacity: 1.0; }
             </style>`;
-        document.head.insertAdjacentHTML('beforeend', style_elm);
+        document.head.insertAdjacentHTML('beforeend', policy.createHTML(style_elm));
     }
 
 
@@ -61,7 +62,6 @@
         </style>
         <link href="https://fonts.googleapis.com/css?family=YouTube+Sans&display=swap" rel="stylesheet">
         `
-        const policy = trustedTypes.createPolicy('default', {createHTML: (string) => string,})
         document.head.insertAdjacentHTML('beforeend', policy.createHTML(css));
     }
 
