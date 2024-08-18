@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2024.08.08.0
+// @version      2024.08.18.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -128,7 +128,7 @@
                     <img src="" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 10px" alt="extended_thumbnail" title="新しいタブで開く">
                 </a>`
             
-            const policy = trustedTypes.createPolicy('default', {createHTML: (string) => string,})
+            const policy = trustedTypes.createPolicy('ytThumbnailPolicy', {createHTML: (string) => string,})
             this.secondary_renderer.insertAdjacentHTML('afterbegin', policy.createHTML(html))
 
             this.extended_thumbnail_frame = document.querySelector('a.ytd-extended-thumbnail')
