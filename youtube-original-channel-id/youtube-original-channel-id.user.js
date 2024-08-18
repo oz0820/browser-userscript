@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2023.12.25.0
+// @version         2024.08.18.0dev
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -31,6 +31,8 @@
             }
         }
     }
+
+    const policy = trustedTypes.createPolicy('ytChannelIDPolicy', {createHTML: (string) => string,})
 
     /* TOOLS*/
 
@@ -66,57 +68,72 @@
         }
 
         const ex_html = `
-<span class="meta-item style-scope ytd-c4-tabbed-header-renderer yt_og_channel_id">
-    <yt-formatted-string id="channel-id" class="style-scope ytd-c4-tabbed-header-renderer yt_og_channel_id">cannot_get_channel_id</yt-formatted-string>
-    <span aria-hidden="true" class="delimiter style-scope ytd-c4-tabbed-header-renderer">‧</span>
-</span>
-
-<span class="meta-item style-scope ytd-c4-tabbed-header-renderer yt_og_channel_id">
-    <button value="change" class="yt_og_channel_id" id="member_list">Member list</button>
-    <span aria-hidden="true" class="delimiter style-scope ytd-c4-tabbed-header-renderer">‧</span>
-</span>
-`
-
-        // チャンネルのハンドルを表示する要素の後ろに ex_html を挿入する
-        document.querySelectorAll('div#inner-header-container span.ytd-c4-tabbed-header-renderer yt-formatted-string#channel-handle')
+<div class="yt_og_channel_id yt-content-metadata-view-model-wiz__metadata-row yt-content-metadata-view-model-wiz__metadata-row--metadata-row-inline">
+    <span class="yt-content-metadata-view-model-wiz__delimiter" aria-hidden="true">
+        •
+    </span>
+    <span id="yt_og_channel_id" class="yt_og_channel_id yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color" dir="auto" role="text">
+        ${cid}
+    </span>
+    <span class="yt-content-metadata-view-model-wiz__delimiter" aria-hidden="true">
+        •
+    </span>
+    <button value="${cid}" class="yt_og_channel_id" id="member_list">Member list</button>
+</div>
+    `
+     
+        document.querySelectorAll('tp-yt-app-header div#contentContainer yt-content-metadata-view-model > div.yt-content-metadata-view-model-wiz__metadata-row > span[role="text"]')
             .forEach(elm => {
-                logger.debug(elm)
-                elm.parentElement.insertAdjacentHTML('afterend', ex_html)
+                // チャンネルハンドルのタグだけ使いたい……
+                if (elm.innerText.startsWith('@')) {
+                    elm.insertAdjacentHTML('afterend', policy.createHTML(ex_html))
+                    elm.setAttribute('id', 'yt_og_channel_handle')
+                }
             })
 
         // 追加したボタンに操作用のEventListenerを追加
         document.querySelectorAll('button#member_list.yt_og_channel_id').forEach((elm) => {
-            elm.addEventListener('click', function () {
-                yt_open_member_list()
+            elm.addEventListener('click', function (event) {
+                yt_open_member_list(event)
             })
         })
 
-
-        // 要素をねじ込むと勝手に is-empty が挿入されるので削除する
-        document.querySelectorAll('yt-formatted-string#channel-id.yt_og_channel_id').forEach((elm) => {
-            elm.innerHTML = cid
-            elm.removeAttribute('is-empty')
+        document.querySelectorAll('span#yt_og_channel_id').forEach(elm => {
+            try {
+                elm.addEventListener('click', function (e) {
+                    if (e.target.getAttribute('role') === "text" && e.target.tagName === "SPAN") {
+                        console.log('TRUE')
+                    }
+                    copyToClipboard(e.target.innerHTML.trim())
+                })
+            } catch (e) {
+                // ???
+            }
         })
 
-        // ハンドル・チャンネルIDをクリックしたらコピーする
-        document.querySelectorAll('yt-formatted-string#channel-handle').forEach(elm => {
-            elm.addEventListener('click', function (e) {
-                copyToClipboard(e.target.innerHTML.trim())
-            })
-        })
-
-        document.querySelectorAll('yt-formatted-string#channel-id').forEach(elm => {
-            elm.addEventListener('click', function (e) {
-                copyToClipboard(e.target.innerHTML.trim())
-            })
+        document.querySelectorAll('span#yt_og_channel_handle').forEach(elm => {
+            try {
+                if (elm.getAttribute('yt_og_channel_id_Listener') === null) {
+                    elm.addEventListener('click', function (e) {
+                        if (e.target.getAttribute('role') === "text" && e.target.tagName === "SPAN") {
+                            console.log('TRUE')
+                        }
+                        copyToClipboard(e.target.innerHTML.trim())
+                    })
+                    elm.setAttribute('yt_og_channel_id_Listener', '')
+                }
+            } catch (e) {
+                // ???
+            }
         })
 
         logger.log('表示OK')
     }
 
 
-    const yt_open_member_list = () => {
-        const member_ship_list = 'https://www.youtube.com/playlist?list=UUMO' + document.querySelector('yt-formatted-string#channel-id').innerText.slice(2)
+    const yt_open_member_list = (event) => {
+        const channel_id = event.target.value
+        const member_ship_list = 'https://www.youtube.com/playlist?list=UUMO' + channel_id.slice(2)
         window.open(member_ship_list, '_blank')
     }
 
@@ -144,14 +161,15 @@
     // 問答無用でクリップボードにぶち込まれるので，カーソル変えて主張する
     const css = `
             <style>
-            yt-formatted-string#channel-id {
+            span#yt_og_channel_id {
                 cursor: pointer;
             }
-            yt-formatted-string#channel-handle {
+            span#yt_og_channel_handle {
                 cursor: pointer;
             }
             </style>`;
-    ( document.head || document.querySelector('head') ).insertAdjacentHTML('beforeend', css)
+
+    ( document.head || document.querySelector('head') ).insertAdjacentHTML('beforeend', policy.createHTML(css))
 
 
     // ページ移動を検出します
