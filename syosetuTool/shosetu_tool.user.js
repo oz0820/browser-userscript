@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2024.07.25.0
+// @version         2024.08.21.0
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -332,8 +332,8 @@
             return;
         }
 
-        const DL_INTERVAL_MS = 5000
-        const RETRY_INTERVAL_MS = 5000
+        const DL_INTERVAL_MS = 6000
+        const RETRY_INTERVAL_MS = 6000
         const MAX_RETRY = 5
 
         const import_module = (url) => {
@@ -429,7 +429,7 @@
                     logger.eta(eta_msg)
                     try {
                         const blob = await retry_fetch(url);
-                        const strip_epi_name = epi_name.slice(epi_name.match(/第\d+部分：/)[0].length)
+                        const strip_epi_name = epi_name.slice(epi_name.match(/エピソード\d+：/)[0].length)
                         const name = `${ncode}-${String(epi_number).padStart(digit, '0')}_${strip_epi_name}`;
                         export_data.push({
                             'name': name,
