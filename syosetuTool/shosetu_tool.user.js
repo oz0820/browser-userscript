@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2024.08.21.0
+// @version         2024.09.22.0
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -14,6 +14,7 @@
 // ==/UserScript==
 
 (function() {
+    /*  20240922 仕様変更対応までショートカット機能以外を無効化
     const novel_data_manager = class {
         async init(ncode) {
             this.ncode = ncode;
@@ -141,11 +142,12 @@
             this.constructor();
         }
     }
+    */
 
 
     function syosetu() {
         const ncode = document.location.href.split("/")[3];
-        const novel_no = document.querySelector("div#novel_no");
+        const novel_no = document.querySelector("div.l-container div.p-novel__number")?.innerText.split('/')[0];
 
 
         // ショートカットキー周り
@@ -156,8 +158,8 @@
             }
 
             // 移動ボタンを取得する
-            const before_button = document.querySelector('div.novel_bn > a.novelview_pager-before');
-            const after_button = document.querySelector('div.novel_bn > a.novelview_pager-next');
+            const before_button = document.querySelector('article.p-novel > div.c-pager > a.c-pager__item--before')
+            const after_button = document.querySelector('article.p-novel > div.c-pager > a.c-pager__item--next')
 
             // 次のページに進む
             if (e.code === "ControlRight" || e.code === "ControlLeft") {
@@ -177,12 +179,6 @@
             } else if (e.code === "ArrowDown") {
                 window.scroll(window.scrollX, window.scrollY+100);
 
-            // しおりをクリック
-            } else if (e.code === "ShiftRight" || e.code === "Enter") {
-                if (document.querySelector('li.bookmark_now.set_siori')) {
-                    const siori_button = document.querySelector('input[name="siori_url"]');
-                    siori_button.click();
-                }
             } else {
                 // console.log(e.key);
             }
@@ -193,8 +189,8 @@
         前後書きの表示・非表示設定
         デフォで前書き・後書きを非表示にする．
          */
-        const novel_p = document.querySelector('div#novel_p')
-        const novel_a = document.querySelector('div#novel_a')
+        const novel_p = document.querySelector("body > div.l-container > main > article > div.p-novel__body > div.p-novel__text--preface")
+        const novel_a = document.querySelector("body > div.l-container > main > article > div.p-novel__body > div.p-novel__text--afterword")
         const hidden_change = (parent_elm) => {  // 渡された要素の子要素に対して，hidden属性を入れ替える
             Array.from(parent_elm.children).forEach(elm => {
                 try {
@@ -227,7 +223,7 @@
 
 
         /* TXTダウンロードを新しいタブで開く */
-        const txt_dl_elm = document.querySelector('div#novel_footer a[onclick]');
+        const txt_dl_elm = document.querySelector('div.c-under-nav > a[onclick]');
         if (!!txt_dl_elm) {
             try {
                 txt_dl_elm.setAttribute('target', '_blank')
@@ -235,9 +231,13 @@
             } catch (e) {}
         }
 
+        
+        // 20240922 仕様変更対応までショートカット機能以外を無効化
 
-         /* 小説の詳細を表示するやつ */
-
+        /* 小説の詳細を表示するやつ */
+        
+        
+        /*
         if (!location.href.match(/https:\/\/(ncode|novel18).syosetu.com\/n\d+[a-z]+\/\d+/)) {
             return;
         }
@@ -324,6 +324,8 @@
                         console.error(e)
                     })
             })
+
+            */
     }
 
 
