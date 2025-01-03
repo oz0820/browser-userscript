@@ -2,7 +2,7 @@
 // @name         YouTube custom style
 // @namespace    https://twitter.com/oz0820
 // @author       oz0820
-// @version      2024.08.19.0
+// @version      2025.01.04.0
 // @description  Youtubeのスタイルを良い感じに書き換えます。
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/youtube-custom-style/youtube-custom-style.user.js
 // @match        https://www.youtube.com/*
@@ -26,18 +26,6 @@
     // observer.observe(document, {childList: true, subtree: true});
 
     const policy = trustedTypes.createPolicy('ytCustomStyle', {createHTML: (string) => string,})
-
-    const func_live_chat = () => {
-        // ライブチャットのハートマークが邪魔なので
-        const style_elm =
-            `<style>
-                yt-reaction-control-panel-overlay-view-model div#reaction-control-panel { margin-bottom: 50px; }
-                yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model { opacity: 0.4; }
-                yt-reaction-control-panel-overlay-view-model yt-reaction-control-panel-view-model:hover { opacity: 1.0; }
-            </style>`;
-        document.head.insertAdjacentHTML('beforeend', policy.createHTML(style_elm));
-    }
-
 
     const func_top = () => {
         // 動画タイトルのフォントを軽くする
@@ -63,10 +51,6 @@
         <link href="https://fonts.googleapis.com/css?family=YouTube+Sans&display=swap" rel="stylesheet">
         `
         document.head.insertAdjacentHTML('beforeend', policy.createHTML(css));
-    }
-
-    if (new URL(location.href).pathname.startsWith('/live_chat')) {
-        func_live_chat();
     }
 
     if (location.href.startsWith('https://www.youtube.com/watch') || 
