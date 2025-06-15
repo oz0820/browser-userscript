@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2024.08.18.0
+// @version      2025.06.15.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -47,6 +47,7 @@
         }
         // 画質良い順に並べる
         const urls = [
+            "https://i.ytimg.com/vi/" + video_id + "/hq720.jpg",
             "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg",
             "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",
             "https://i.ytimg.com/vi/" + video_id + "/0.jpg"
