@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2025.06.15.0
+// @version      2025.06.22.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -47,10 +47,11 @@
         }
         // 画質良い順に並べる
         const urls = [
-            "https://i.ytimg.com/vi/" + video_id + "/hq720.jpg",
-            "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg",
-            "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",
-            "https://i.ytimg.com/vi/" + video_id + "/0.jpg"
+            "https://i.ytimg.com/vi/" + video_id + "/maxresdefault.jpg",    // 720p
+            "https://i.ytimg.com/vi/" + video_id + "/sddefault.jpg",        // 480p
+            "https://i.ytimg.com/vi/" + video_id + "/hqdefault.jpg",        // 360p
+            "https://i.ytimg.com/vi/" + video_id + "/mqdefault.jpg",        // 180p
+            "https://i.ytimg.com/vi/" + video_id + "/default.jpg"           //  90p
         ];
 
         // 何故かCORSで怒られることがあるので、とりあえず最高画質のURLを指定する
