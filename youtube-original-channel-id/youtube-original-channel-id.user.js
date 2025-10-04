@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2024.08.18.0dev
+// @version         2025.10.05.0dev
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -54,13 +54,14 @@
     const work = async () => {
         logger.debug('init start')
         // 念のため削除
-        document.querySelectorAll('.yt_og_channel_id').forEach((elm) => {
+        document.querySelectorAll('.YT-Original-channel-ID').forEach((elm) => {
             elm.remove()
         })
         logger.debug('過去要素削除')
 
         const cid = await original_channel_id()
-        logger.debug('get cid')
+        logger.debug('get cid: '+ cid)
+
 
         if (!cid) {
             logger.error('ChannelIDが見つかりません')
@@ -68,60 +69,34 @@
         }
 
         const ex_html = `
-<div class="yt_og_channel_id yt-content-metadata-view-model-wiz__metadata-row yt-content-metadata-view-model-wiz__metadata-row--metadata-row-inline">
-    <span class="yt-content-metadata-view-model-wiz__delimiter" aria-hidden="true">
-        •
-    </span>
-    <span id="yt_og_channel_id" class="yt_og_channel_id yt-core-attributed-string yt-content-metadata-view-model-wiz__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color" dir="auto" role="text">
-        ${cid}
-    </span>
-    <span class="yt-content-metadata-view-model-wiz__delimiter" aria-hidden="true">
-        •
-    </span>
-    <button value="${cid}" class="yt_og_channel_id" id="member_list">Member list</button>
+<div class="ytFlexibleActionsViewModelAction YT-Original-channel-ID">
+  <button-view-model class="ytSpecButtonViewModelHost" style="display: padding-left: 16px;">
+    <button id="get_channel_id" class="yt-spec-button-shape-next yt-spec-button-shape-next--outline yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--enable-backdrop-filter-experiment" title="" aria-label="チャンネルIDを取得" cid="${cid}" aria-disabled="false" style="">
+      <div class="yt-spec-button-shape-next__button-text-content">チャンネルIDを取得</div>
+    </button>
+  </button-view-model>
 </div>
-    `
+<div class="ytFlexibleActionsViewModelAction YT-Original-channel-ID">
+  <button-view-model class="ytSpecButtonViewModelHost">
+    <a id="go-to-member-playlist" href="/playlist?list=UUMO${cid.slice(2)}" target="_blank" class="yt-spec-button-shape-next yt-spec-button-shape-next--outline yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--enable-backdrop-filter-experiment" title="" aria-label="メンバー動画リスト" aria-disabled="false" style="">
+      <div class="yt-spec-button-shape-next__button-text-content">メンバー動画リスト</div>
+    </a>
+  </button-view-model>
+</div>
+`
      
-        document.querySelectorAll('tp-yt-app-header div#contentContainer yt-content-metadata-view-model > div.yt-content-metadata-view-model-wiz__metadata-row > span[role="text"]')
-            .forEach(elm => {
-                // チャンネルハンドルのタグだけ使いたい……
-                if (elm.innerText.startsWith('@')) {
-                    elm.insertAdjacentHTML('afterend', policy.createHTML(ex_html))
-                    elm.setAttribute('id', 'yt_og_channel_handle')
-                }
-            })
+        // ex_htmlをyt-flexible-actions-view-model要素内の後ろに挿入
+        document.querySelectorAll('yt-flexible-actions-view-model').forEach(flexActions => {
+            flexActions.insertAdjacentHTML('beforeend', policy.createHTML(ex_html));
+        });
 
-        // 追加したボタンに操作用のEventListenerを追加
-        document.querySelectorAll('button#member_list.yt_og_channel_id').forEach((elm) => {
-            elm.addEventListener('click', function (event) {
-                yt_open_member_list(event)
-            })
-        })
 
-        document.querySelectorAll('span#yt_og_channel_id').forEach(elm => {
+        document.querySelectorAll('button#get_channel_id').forEach(elm => {
             try {
                 elm.addEventListener('click', function (e) {
-                    if (e.target.getAttribute('role') === "text" && e.target.tagName === "SPAN") {
-                        console.log('TRUE')
-                    }
-                    copyToClipboard(e.target.innerHTML.trim())
+                    logger.debug(e.target.closest('button#get_channel_id'))
+                    copyToClipboard(e.target.closest('button#get_channel_id').getAttribute('cid').trim())
                 })
-            } catch (e) {
-                // ???
-            }
-        })
-
-        document.querySelectorAll('span#yt_og_channel_handle').forEach(elm => {
-            try {
-                if (elm.getAttribute('yt_og_channel_id_Listener') === null) {
-                    elm.addEventListener('click', function (e) {
-                        if (e.target.getAttribute('role') === "text" && e.target.tagName === "SPAN") {
-                            console.log('TRUE')
-                        }
-                        copyToClipboard(e.target.innerHTML.trim())
-                    })
-                    elm.setAttribute('yt_og_channel_id_Listener', '')
-                }
             } catch (e) {
                 // ???
             }
@@ -142,8 +117,11 @@
             const response = await fetch(location.href)
             const html = await response.text()
 
-            const parser = new DOMParser()
-            const doc = parser.parseFromString(html, 'text/html')
+            // TrustedHTML に変換（Trusted Types 未対応のブラウザならそのまま）
+            const safeHtml = policy ? policy.createHTML(html) : html;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(safeHtml, 'text/html')
 
             let og_url = doc.querySelector('meta[property="og:url"]').getAttribute('content')
             const cid = og_url.split('/')[4]
@@ -157,20 +135,6 @@
             return null
         }
     }
-
-    // 問答無用でクリップボードにぶち込まれるので，カーソル変えて主張する
-    const css = `
-            <style>
-            span#yt_og_channel_id {
-                cursor: pointer;
-            }
-            span#yt_og_channel_handle {
-                cursor: pointer;
-            }
-            </style>`;
-
-    ( document.head || document.querySelector('head') ).insertAdjacentHTML('beforeend', policy.createHTML(css))
-
 
     // ページ移動を検出します
     let path = location.pathname
