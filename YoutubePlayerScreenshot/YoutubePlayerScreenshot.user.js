@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name            YouTube Player Screenshot
 // @namespace       https://twitter.com/oz0820
-// @version         2025.10.05.1
+// @version         2025.10.05.2
 // @description     なんか強いスクショ
 // @author          oz0820
-// @match           https://www.youtube.com/live/*
-// @match           https://www.youtube.com/watch*
+// @match           https://www.youtube.com/*
 // @updateURL       https://github.com/oz0820/browser-userscript/raw/main/YoutubePlayerScreenshot/YoutubePlayerScreenshot.user.js
 // @icon            https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // ==/UserScript==
@@ -259,13 +258,17 @@
     const waitForCtrlBar = () => {
         return new Promise(resolve => {
             const ctrl_bar = document.querySelector('div.ytp-right-controls');
-            if (ctrl_bar) {
+            if (ctrl_bar &&
+                (location.pathname.startsWith('/live/') || location.pathname.startsWith('/watch'))) {
                 resolve(ctrl_bar);
                 return;
             }
             const observer = new MutationObserver(() => {
                 const ctrl_bar = document.querySelector('div.ytp-right-controls');
-                if (ctrl_bar) {
+                if (
+                    ctrl_bar &&
+                    (location.pathname.startsWith('/live/') || location.pathname.startsWith('/watch'))
+                ) {
                     observer.disconnect();
                     resolve(ctrl_bar);
                 }
