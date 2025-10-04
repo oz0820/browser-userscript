@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube Player Screenshot
 // @namespace       https://twitter.com/oz0820
-// @version         2025.10.05.0
+// @version         2025.10.05.1
 // @description     なんか強いスクショ
 // @author          oz0820
 // @match           https://www.youtube.com/live/*
