@@ -246,6 +246,8 @@
         my_image_body.addEventListener('click', (e) => {
             if (e.target === e.currentTarget) {
                 logger.debug('オーバーレイを閉じます')
+                // Blob URLを全て解放
+                blob_data_list.forEach(b => URL.revokeObjectURL(b.url));
                 e.currentTarget.remove()
             }
         })
