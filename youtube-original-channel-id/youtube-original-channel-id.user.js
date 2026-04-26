@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2025.10.05.1dev
+// @version         2026.04.26.0
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -62,14 +62,14 @@
     const createActionButtonsHTML = cid => `
 <div class="ytFlexibleActionsViewModelAction YT-Original-channel-ID">
   <button-view-model class="ytSpecButtonViewModelHost" style="display: padding-left: 16px;">
-    <button id="get_channel_id" class="yt-spec-button-shape-next yt-spec-button-shape-next--outline yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--enable-backdrop-filter-experiment" title="" aria-label="チャンネルIDを取得" cid="${cid}" aria-disabled="false">
+    <button id="get_channel_id" class="ytSpecButtonShapeNextHost ytSpecButtonShapeNextFilled ytSpecButtonShapeNextMono ytSpecButtonShapeNextSizeM ytSpecButtonShapeNextDisableTextEllipsis ytSpecButtonShapeNextEnableBackdropFilterExperiment" title="" aria-label="チャンネルIDを取得" cid="${cid}" aria-disabled="false">
       <div class="yt-spec-button-shape-next__button-text-content">チャンネルIDを取得</div>
     </button>
   </button-view-model>
 </div>
 <div class="ytFlexibleActionsViewModelAction YT-Original-channel-ID">
   <button-view-model class="ytSpecButtonViewModelHost">
-    <a id="go-to-member-playlist" href="/playlist?list=UUMO${cid.slice(2)}" target="_blank" class="yt-spec-button-shape-next yt-spec-button-shape-next--outline yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--enable-backdrop-filter-experiment" title="" aria-label="メンバー動画リスト" aria-disabled="false">
+    <a id="go-to-member-playlist" href="/playlist?list=UUMO${cid.slice(2)}" target="_blank" class="ytSpecButtonShapeNextHost ytSpecButtonShapeNextFilled ytSpecButtonShapeNextMono ytSpecButtonShapeNextSizeM ytSpecButtonShapeNextDisableTextEllipsis ytSpecButtonShapeNextEnableBackdropFilterExperiment" title="" aria-label="メンバー動画リスト" aria-disabled="false">
       <div class="yt-spec-button-shape-next__button-text-content">メンバー動画リスト</div>
     </a>
   </button-view-model>
