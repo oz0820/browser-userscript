@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Abema URL Sender
-// @version      2026.05.12.0
+// @version      2026.05.12.1
 // @match        https://abema.tv/video/title/*
-// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/abema-url-sender/abema-url-sender.user.js
+// @updateURL    https://github.com/oz0820/browser-userscript/raw/main/abema-url-sender/Abema URL Sender.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=abema.tv
 
 // ==/UserScript==
