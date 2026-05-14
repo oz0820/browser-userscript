@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2025.06.22.1
+// @version      2026.05.14.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -134,7 +134,7 @@
             // サイドバーDOMが表示されるまで待機
             logger("ThumbnailViewManager: _waitForSecondaryRenderer start");
             while (true) {
-                const el = document.querySelector('ytd-watch-next-secondary-results-renderer');
+                const el = document.querySelector('ytd-watch-flexy > div#columns > div#secondary');
                 if (el && el.clientHeight !== 0) {
                     this.secondaryRenderer = el;
                     logger("ThumbnailViewManager: secondaryRenderer found");
