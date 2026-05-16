@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2026.05.14.0
+// @version      2026.05.16.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -152,15 +152,29 @@
                 `<a class="ytd-extended-thumbnail wrapper" href="" target="_blank">
                     <img src="" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 10px" alt="extended_thumbnail" title="新しいタブで開く">
                 </a>`;
-            // trustedTypes未対応ブラウザ対策
-            if (window.trustedTypes) {
-                const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
-                this.secondaryRenderer.insertAdjacentHTML('afterbegin', policy.createHTML(html));
+            // #secondary-inner > #related の直前に挿入
+            const secondaryInner = this.secondaryRenderer.querySelector('div#secondary-inner');
+            const related = secondaryInner ? secondaryInner.querySelector('div#related') : null;
+            if (secondaryInner && related) {
+                if (window.trustedTypes) {
+                    const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
+                    related.insertAdjacentHTML('beforebegin', policy.createHTML(html));
+                } else {
+                    related.insertAdjacentHTML('beforebegin', html);
+                }
+                this.thumbnailLink = secondaryInner.querySelector('a.ytd-extended-thumbnail');
+                this.thumbnailImg = this.thumbnailLink.querySelector('img#extended_thumbnail');
             } else {
-                this.secondaryRenderer.insertAdjacentHTML('afterbegin', html);
+                // fallback: これまで通りsecondaryRenderer先頭
+                if (window.trustedTypes) {
+                    const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
+                    this.secondaryRenderer.insertAdjacentHTML('afterbegin', policy.createHTML(html));
+                } else {
+                    this.secondaryRenderer.insertAdjacentHTML('afterbegin', html);
+                }
+                this.thumbnailLink = this.secondaryRenderer.querySelector('a.ytd-extended-thumbnail');
+                this.thumbnailImg = this.thumbnailLink.querySelector('img#extended_thumbnail');
             }
-            this.thumbnailLink = this.secondaryRenderer.querySelector('a.ytd-extended-thumbnail');
-            this.thumbnailImg = this.thumbnailLink.querySelector('img#extended_thumbnail');
         }
     }
 
