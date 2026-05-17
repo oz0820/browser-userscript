@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            YouTube original channel id
 // @namespace       https://twitter.com/oz0820
-// @version         2026.04.26.0
+// @version         2026.05.17.0
 // @description     YoutubeのチャンネルIDを表示する機能を追加します
 // @author          oz0820
 // @match           https://www.youtube.com/*
@@ -145,7 +145,7 @@
         }
 
         const ex_html = createActionButtonsHTML(cid)
-        document.querySelectorAll('yt-flexible-actions-view-model').forEach(flexActions => {
+        document.querySelectorAll('div#page-header yt-flexible-actions-view-model').forEach(flexActions => {
             flexActions.insertAdjacentHTML('beforeend', policy.createHTML(ex_html))
         })
 
