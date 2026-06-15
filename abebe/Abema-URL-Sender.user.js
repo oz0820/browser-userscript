@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Abema URL Sender
-// @version      2026.05.17.0
+// @version      2026.06.15.0
 // @match        https://abema.tv/video/title/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/abebe/Abema-URL-Sender.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=abema.tv
@@ -18,10 +18,29 @@
         return btn;
     }
 
+    // 固定レイヤー作成関数
+    function createButtonLayer() {
+        let layer = document.getElementById("abema-button-layer");
+        if (layer) return layer;
+
+        layer = document.createElement("div");
+        layer.id = "abema-button-layer";
+        layer.style.position = "fixed";
+        layer.style.top = "1em";
+        layer.style.right = "250px";
+        layer.style.zIndex = "999999";
+        layer.style.display = "flex";
+        layer.style.gap = "8px";
+        layer.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+        layer.style.padding = "10px";
+        layer.style.borderRadius = "4px";
+        document.body.appendChild(layer);
+        return layer;
+    }
+
     // 1秒待機してからボタン追加
     setTimeout(() => {
-        const actionButtons = document.querySelector("div.com-pages-series-SeriesSection div.com-pages-series-SeriesSection__action-buttons");
-        if (!actionButtons) return;
+        const buttonLayer = createButtonLayer();
 
         // リスト保存ボタン
         const saveBtn = createButton("リスト保存", function() {
@@ -82,8 +101,8 @@
                     results: results
                 };
                 localStorage.setItem("abebe", JSON.stringify(abebe));
-                alert(`${results.length}\nLocalStorageに保存しました（key: abebe, subkey: ${pathKey}）`);
                 window.scrollTo({ top: 0});
+                alert(`${results.length}\nLocalStorageに保存しました（key: abebe, subkey: ${pathKey}）`);
                 window.close();
             }, 500); // 0.5秒待機
         });
@@ -145,10 +164,10 @@
         });
 
         // ボタンをまとめて挿入
-        actionButtons.appendChild(saveBtn);
-        saveBtn.after(extractBtn);
-        extractBtn.after(clearBtn);
-    }, 3000); // 1秒待
+        buttonLayer.appendChild(saveBtn);
+        buttonLayer.appendChild(extractBtn);
+        buttonLayer.appendChild(clearBtn);
+    }, 500); // 1秒待
 })();
 
 
