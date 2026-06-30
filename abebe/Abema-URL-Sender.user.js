@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Abema URL Sender
-// @version      2026.06.15.0
+// @version      2026.07.01.0
 // @match        https://abema.tv/video/title/*
 // @updateURL    https://github.com/oz0820/browser-userscript/raw/main/abebe/Abema-URL-Sender.user.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=abema.tv
@@ -51,9 +51,11 @@
                 let episode_elm_list = document.querySelectorAll("div.com-contentlist-ContentlistContainer li.com-contentlist-ItemListForContentlistContent__item");
                 let results = [];
                 episode_elm_list.forEach(function (episode_elm) {
-                    let url = episode_elm.querySelector("a").href;
-                    let isPreBroadcast = !!episode_elm.querySelector("span.com-PreBroadcastTag");
-                    let isPremium = episode_elm.querySelector("span.com-shared-viewing_type-ViewingTypeLabel > span").innerText === "プレミアム";
+                    let url = episode_elm.querySelector("a")?.href || "";
+                    let isPreBroadcast = (!!episode_elm.querySelector("span.com-PreBroadcastTag") || 
+                                            !!episode_elm.querySelector("span.com-shared-premium_precedence-PremiumPrecedenceLabel__text"));
+                    let isPremium = (episode_elm.querySelector("span.com-shared-viewing_type-ViewingTypeLabel > span")?.innerText === "プレミアム" ||
+                                    episode_elm.querySelector("span.com-shared-premium_precedence-PremiumPrecedenceLabel__text")?.innerText === "プレミアム先行");
 
                     let expirationElm = episode_elm.querySelector("span.com-expiration_date-ExpiredDateText__text");
                     let vodExpiration = -1;
@@ -95,14 +97,15 @@
                         delete abebe[key];
                     }
                 }
-
                 abebe[pathKey] = {
                     timestamp: now,
                     results: results
                 };
                 localStorage.setItem("abebe", JSON.stringify(abebe));
                 window.scrollTo({ top: 0});
-                alert(`${results.length}\nLocalStorageに保存しました（key: abebe, subkey: ${pathKey}）`);
+
+                const onlineVideoCount = results.filter(item => item.isPremium === false && item.isPreBroadcast === false).length;
+                alert(`取得：${results.length}\n有効：${onlineVideoCount}\nLocalStorageに保存しました（key: abebe, subkey: ${pathKey}）`);
                 window.close();
             }, 500); // 0.5秒待機
         });
