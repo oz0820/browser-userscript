@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2026.05.16.0
+// @version      2026.07.20.0
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -152,15 +152,28 @@
                 `<a class="ytd-extended-thumbnail wrapper" href="" target="_blank">
                     <img src="" id="extended_thumbnail" class="style-scope ytd-extended-thumbnail" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 10px" alt="extended_thumbnail" title="新しいタブで開く">
                 </a>`;
-            // #secondary-inner > #related の直前に挿入
+            // #secondary-inner > #related or #player-ads の直前に挿入
             const secondaryInner = this.secondaryRenderer.querySelector('div#secondary-inner');
+            logger.debug("secondaryInner",secondaryInner)
             const related = secondaryInner ? secondaryInner.querySelector('div#related') : null;
+            logger.debug("related",related)
+            const player_ads = secondaryInner ? secondaryInner.querySelector('div#player-ads') : null;
+            logger.debug("player_ads",player_ads)
             if (secondaryInner && related) {
                 if (window.trustedTypes) {
                     const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
                     related.insertAdjacentHTML('beforebegin', policy.createHTML(html));
                 } else {
                     related.insertAdjacentHTML('beforebegin', html);
+                }
+                this.thumbnailLink = secondaryInner.querySelector('a.ytd-extended-thumbnail');
+                this.thumbnailImg = this.thumbnailLink.querySelector('img#extended_thumbnail');
+            } else if (secondaryInner && player_ads) {
+                if (window.trustedTypes) {
+                    const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
+                    player_ads.insertAdjacentHTML('beforebegin', policy.createHTML(html));
+                } else {
+                    player_ads.insertAdjacentHTML('beforebegin', html);
                 }
                 this.thumbnailLink = secondaryInner.querySelector('a.ytd-extended-thumbnail');
                 this.thumbnailImg = this.thumbnailLink.querySelector('img#extended_thumbnail');
