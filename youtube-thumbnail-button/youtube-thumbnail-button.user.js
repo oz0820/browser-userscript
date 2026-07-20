@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         YouTube Thumbnail Button
 // @namespace    https://twitter.com/oz0820
-// @version      2026.07.20.0
+// @version      2026.07.20.1
 // @description  Youtubeの再生ページにサムネイルプレビューを追加します。
 // @author       oz0820
 // @match        https://www.youtube.com/*
@@ -154,11 +154,8 @@
                 </a>`;
             // #secondary-inner > #related or #player-ads の直前に挿入
             const secondaryInner = this.secondaryRenderer.querySelector('div#secondary-inner');
-            logger.debug("secondaryInner",secondaryInner)
             const related = secondaryInner ? secondaryInner.querySelector('div#related') : null;
-            logger.debug("related",related)
             const player_ads = secondaryInner ? secondaryInner.querySelector('div#player-ads') : null;
-            logger.debug("player_ads",player_ads)
             if (secondaryInner && related) {
                 if (window.trustedTypes) {
                     const policy = trustedTypes.createPolicy('ytThumbnailPolicy', { createHTML: s => s });
