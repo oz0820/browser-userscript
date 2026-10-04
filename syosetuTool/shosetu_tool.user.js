@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2026.10.05.8
+// @version         2026.10.05.1
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -261,6 +261,8 @@
                 gap: 0;
             }
             .st-enhanced-pager .c-pager--center > a.c-pager__item {
+                grid-column: 2;
+                grid-row: 1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -271,6 +273,13 @@
                 padding: 0;
                 border: 1px solid #ddd;
                 touch-action: manipulation;
+            }
+            /* 位置を固定し、第1話では左列を枠もリンクもない空白として残す。 */
+            .st-enhanced-pager .c-pager--center > a.c-pager__item--before {
+                grid-column: 1;
+            }
+            .st-enhanced-pager .c-pager--center > a.c-pager__item--next {
+                grid-column: 3;
             }
             .st-enhanced-pager .c-pager--center > a.c-pager__item + a.c-pager__item {
                 border-left: 0;
