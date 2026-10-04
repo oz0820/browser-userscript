@@ -2,7 +2,7 @@
 // @name            Syosetu Tool
 // @namespace       https://twitter.com/oz0820
 // @author          oz0820
-// @version         2024.09.22.0
+// @version         2026.10.05.8
 // @description     小説家になろうをキーボードだけで読むためのツール。ノベルピア・カクヨムも一部対応。
 // @match           https://ncode.syosetu.com/*
 // @match           https://novel18.syosetu.com/*
@@ -145,9 +145,227 @@
     */
 
 
+    // 2026-10-05 廃止：下部オーバーレイの代わりに、ページ内の移動ボタンを拡大する。
+    // 旧実装は参照用に残す。syosetu() からの呼び出しはコメントアウト済み。
+    function add_syosetu_mobile_episode_nav(previous_action, next_action) {
+        if (document.querySelector('.st-mobile-episode-nav')) {
+            return;
+        }
+
+        const is_mobile = window.matchMedia('(max-width: 767px)').matches ||
+            navigator.userAgentData?.mobile ||
+            /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        if (!is_mobile) {
+            return;
+        }
+
+        const actions = [
+            { label: '‹ 前の話', side: 'previous', action: previous_action },
+            { label: '次の話 ›', side: 'next', action: next_action }
+        ].filter(item => typeof item.action === 'function');
+
+        if (actions.length === 0) {
+            return;
+        }
+        document.documentElement.classList.add('st-mobile-device');
+
+        const nav = document.createElement('nav');
+        nav.className = 'st-mobile-episode-nav';
+        nav.setAttribute('aria-label', 'エピソード移動');
+
+        actions.forEach(item => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = `st-mobile-episode-nav__${item.side}`;
+            button.textContent = item.label;
+            button.addEventListener('click', item.action);
+            nav.appendChild(button);
+        });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            .st-mobile-episode-nav {
+                display: none;
+            }
+            .st-mobile-device body {
+                padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+            }
+            .st-mobile-device .st-mobile-episode-nav {
+                position: fixed;
+                z-index: 2147483000;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                display: flex;
+                justify-content: space-between;
+                box-sizing: border-box;
+                padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+                pointer-events: none;
+            }
+            .st-mobile-device .st-mobile-episode-nav button {
+                flex: 0 0 auto;
+                box-sizing: border-box;
+                width: clamp(86px, 26vw, 120px);
+                min-width: 0;
+                min-height: 44px;
+                padding: 8px 6px;
+                border: 1px solid rgba(0, 0, 0, .25);
+                border-radius: 6px;
+                background: rgba(255, 255, 255, .55);
+                color: rgba(0, 0, 0, .75);
+                box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
+                backdrop-filter: blur(2px);
+                font: inherit;
+                font-size: .9rem;
+                white-space: nowrap;
+                cursor: pointer;
+                touch-action: manipulation;
+                pointer-events: auto;
+            }
+            .st-mobile-device .st-mobile-episode-nav__next {
+                margin-left: auto;
+            }
+            .st-mobile-device .st-mobile-episode-nav button:active {
+                background: rgba(255, 255, 255, .8);
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(nav);
+    }
+
+
+    function enlarge_syosetu_pager() {
+        if (document.getElementById('st-pager-style')) {
+            return;
+        }
+
+        // タブレットにはPC用のHTMLが届く場合があるため、端末名や画面幅で分岐しない。
+        // 両方のスタイルを用意し、実際のページ内のボタン構造に合わせて適用する。
+        document.documentElement.classList.add('st-enhanced-pager');
+        const style = document.createElement('style');
+        style.id = 'st-pager-style';
+        // スマホは幅や列の割り当てを維持し、高さだけ36pxから64px以上にする。
+        // PCは本文と同じ幅の3列にして、上下どちらの移動ボタンも押しやすくする。
+        // リンクを枠内いっぱいに伸ばすことで、文字の周囲もタップできる。
+        style.textContent = `
+            .st-enhanced-pager .c-pager--center {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                width: var(--st-novel-text-width, 600px);
+                max-width: 100%;
+                min-height: 64px;
+                box-sizing: border-box;
+                margin-left: auto;
+                margin-right: auto;
+                padding: 0;
+                gap: 0;
+            }
+            .st-enhanced-pager .c-pager--center > a.c-pager__item {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                min-width: 0;
+                min-height: 64px;
+                margin: 0;
+                padding: 0;
+                border: 1px solid #ddd;
+                touch-action: manipulation;
+            }
+            .st-enhanced-pager .c-pager--center > a.c-pager__item + a.c-pager__item {
+                border-left: 0;
+            }
+            .st-enhanced-pager .c-pager--novel-box,
+            .st-enhanced-pager .c-pager--novel-box-with-bkm {
+                min-height: 64px;
+            }
+            .st-enhanced-pager :is(.c-pager--novel-box, .c-pager--novel-box-with-bkm) > .c-pager__block {
+                display: flex;
+                align-items: stretch;
+                min-height: 64px;
+            }
+            .st-enhanced-pager :is(.c-pager--novel-box, .c-pager--novel-box-with-bkm) > .c-pager__block > a.c-pager__item {
+                display: flex;
+                flex: 1 1 auto;
+                align-self: stretch;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                min-height: 64px;
+                height: auto;
+                padding-top: 0;
+                padding-bottom: 0;
+                touch-action: manipulation;
+            }
+        `;
+        document.head.appendChild(style);
+
+        if (document.querySelector('.c-pager--center > a.c-pager__item')) {
+            const novel_text = document.querySelector('.p-novel__text:not(.p-novel__text--preface):not(.p-novel__text--afterword)');
+            if (novel_text) {
+                const update_pager_width = () => {
+                    document.documentElement.style.setProperty('--st-novel-text-width', `${novel_text.getBoundingClientRect().width}px`);
+                };
+                update_pager_width();
+                // 表示調整で本文幅が変わった場合も追従する。監視対象は本文1要素のみ。
+                new ResizeObserver(update_pager_width).observe(novel_text);
+            }
+        }
+
+        document.querySelectorAll('.c-pager--novel-box > .c-pager__block, .c-pager--novel-box-with-bkm > .c-pager__block').forEach(block => {
+            const link = block.querySelector('a.c-pager__item');
+            if (!link) {
+                return;
+            }
+            // 枠線など、リンクの外側に残る部分をタップした場合も移動する。
+            // リンク自身のクリックはブラウザーの通常動作に任せ、二重実行を避ける。
+            block.addEventListener('click', event => {
+                if (event.target === block && !event.defaultPrevented && event.button === 0 &&
+                    !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+                    link.click();
+                }
+            });
+        });
+    }
+
+
     function syosetu() {
         const ncode = document.location.href.split("/")[3];
         const novel_no = document.querySelector("div.l-container div.p-novel__number")?.innerText.split('/')[0];
+
+        // 指定された広告枠と下部オーバーレイを隠す。
+        // CSSにより遅延挿入にも対応し、DOM全体の常時監視は行わない。
+        const hidden_ad_selectors = [
+            'body > div.l-container > main > article > div.c-ad.c-ad--leaderboard',
+            'body > div.l-container > main > div.c-ad.c-ad--layout-horizontal',
+            'body > div.l-container > div.l-foot-contents > div.c-ad.c-ad--layout-horizontal',
+            // PC・スマホ共通の下端バナー。閉じるボタンと背景も含む外枠を隠す。
+            'html body #flexible-sticky-outer',
+            'html body .flexible_sticky_ov',
+            // PC版の下部固定広告と、スマホ版の浮動広告グループ。
+            'html body .ly_gnsinpage_ad--bottom',
+            'html body .gn-fc-group-parent',
+            // スマホ版の上部バナー。
+            'body > div.l-container > div.c-ad.c-ad--mobile'
+        ];
+        const hidden_ad_style = document.createElement('style');
+        hidden_ad_style.textContent = `${hidden_ad_selectors.join(',\n')} { display: none !important; }`;
+        document.head.appendChild(hidden_ad_style);
+        document.querySelectorAll(hidden_ad_selectors.join(',')).forEach(elm => {
+            elm.hidden = true;
+        });
+
+        if (/^\/n\d+[a-z]+\/\d+\/?$/.test(location.pathname)) {
+            /* 2026-10-05 廃止：オーバーレイボタンの呼び出しを無効化。旧コードは保存する。
+            const previous_link = document.querySelector('.c-pager a.c-pager__item--before');
+            const next_link = document.querySelector('.c-pager a.c-pager__item--next');
+            add_syosetu_mobile_episode_nav(
+                previous_link ? () => previous_link.click() : null,
+                next_link ? () => next_link.click() : null
+            );
+            */
+            enlarge_syosetu_pager();
+        }
 
 
         // ショートカットキー周り
@@ -158,8 +376,8 @@
             }
 
             // 移動ボタンを取得する
-            const before_button = document.querySelector('article.p-novel > div.c-pager > a.c-pager__item--before')
-            const after_button = document.querySelector('article.p-novel > div.c-pager > a.c-pager__item--next')
+            const before_button = document.querySelector('.c-pager a.c-pager__item--before')
+            const after_button = document.querySelector('.c-pager a.c-pager__item--next')
 
             // 次のページに進む
             if (e.code === "ControlRight" || e.code === "ControlLeft") {
@@ -186,40 +404,98 @@
 
 
         /*
-        前後書きの表示・非表示設定
-        デフォで前書き・後書きを非表示にする．
+        前書き・後書きを初期状態で隠す。
+        スマートフォンでも押しやすいボタンから表示を切り替える。
          */
-        const novel_p = document.querySelector("body > div.l-container > main > article > div.p-novel__body > div.p-novel__text--preface")
-        const novel_a = document.querySelector("body > div.l-container > main > article > div.p-novel__body > div.p-novel__text--afterword")
-        const hidden_change = (parent_elm) => {  // 渡された要素の子要素に対して，hidden属性を入れ替える
-            Array.from(parent_elm.children).forEach(elm => {
-                try {
-                    if ( elm.hasAttribute('hidden') ) {
-                        elm.removeAttribute('hidden')
-                    } else {
-                        elm.setAttribute('hidden', '')
-                    }
-                } catch (e) {
-                    // console.error(e)
-                    }
-            })
-        }
-        if (!!novel_p) {
-            const mae = `<p style="text-align: center;" hidden>～～前書き（${novel_p.children.length}行）～～</p>`
-            novel_p.insertAdjacentHTML('beforeend', mae)
-            hidden_change(novel_p)
-            novel_p.addEventListener('click', function (e) {
-               hidden_change(e.currentTarget);
-            })
-        }
-        if (!!novel_a) {
-            const ato = `<p style="text-align: center;" hidden>～～後書き（${novel_a.children.length}行）～～</p>`
-            novel_a.insertAdjacentHTML('beforeend', ato)
-            hidden_change(novel_a)
-            novel_a.addEventListener('click', function (e) {
-                hidden_change(e.currentTarget);
-            })
-        }
+        const add_section_toggle = (section, label) => {
+            if (!section || section.dataset.stToggleReady === 'true') {
+                return;
+            }
+
+            const contents = Array.from(section.children);
+            if (contents.length === 0) {
+                return;
+            }
+
+            section.dataset.stToggleReady = 'true';
+            if (!section.id) {
+                section.id = `st-${label}-${Math.random().toString(36).slice(2, 9)}`;
+            }
+
+            const originally_hidden = contents.map(elm => elm.hidden);
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'st-section-toggle';
+            toggle.setAttribute('aria-controls', section.id);
+            toggle.setAttribute('aria-expanded', 'false');
+
+            const set_expanded = (expanded) => {
+                // 折りたたみ時もサイト本来の仕切り線を残し、空の本文枠の余白だけ詰める。
+                section.classList.toggle('st-section-collapsed', !expanded);
+                contents.forEach((elm, i) => {
+                    elm.hidden = expanded ? originally_hidden[i] : true;
+                });
+                toggle.setAttribute('aria-expanded', String(expanded));
+                toggle.textContent = expanded
+                    ? `${label}を隠す`
+                    : `${label}（${contents.length}行）を表示`;
+            };
+
+            toggle.addEventListener('click', () => {
+                set_expanded(toggle.getAttribute('aria-expanded') !== 'true');
+            });
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .st-section-toggle {
+                    display: block;
+                    box-sizing: border-box;
+                    width: 100%;
+                    min-height: 0;
+                    margin: 0;
+                    padding: 0;
+                    border: 0;
+                    border-radius: 0;
+                    background: transparent;
+                    color: inherit;
+                    font: inherit;
+                    line-height: inherit;
+                    white-space: nowrap;
+                    text-align: center;
+                    cursor: pointer;
+                    touch-action: manipulation;
+                }
+                .st-section-toggle:focus-visible {
+                    outline: 2px solid currentColor;
+                    outline-offset: 2px;
+                }
+                #${section.id}.st-section-collapsed {
+                    padding-top: 0;
+                    padding-bottom: 0;
+                    margin-top: .5em;
+                    margin-bottom: .5em;
+                }
+                #${section.id} > [hidden] {
+                    display: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+            if (section.classList.contains('p-novel__text--afterword')) {
+                // 後書きは上側に仕切り線があるため、枠内の先頭に切替文字を置く。
+                // contents は挿入前に取得済みなので、このボタン自体は非表示にしない。
+                section.prepend(toggle);
+            } else {
+                section.parentElement.insertBefore(toggle, section);
+            }
+            set_expanded(false);
+        };
+
+        document.querySelectorAll('.p-novel__text--preface').forEach(section => {
+            add_section_toggle(section, '前書き');
+        });
+        document.querySelectorAll('.p-novel__text--afterword').forEach(section => {
+            add_section_toggle(section, '後書き');
+        });
 
 
         /* TXTダウンロードを新しいタブで開く */
@@ -567,12 +843,11 @@
 
     function novelpia() {
         function move_to_next_page() {
-            document.querySelector('div[id="footer_bar"]').querySelector('tr').children[6].click();
+            document.querySelector('div[id="footer_bar"] tr')?.children[6]?.click();
         }
         function move_to_before_page() {
-            document.querySelector('div[id="footer_bar"]').querySelector('tr').children[1].click();
+            document.querySelector('div[id="footer_bar"] tr')?.children[1]?.click();
         }
-
 
         document.addEventListener('keydown', function(e) {
 
@@ -597,7 +872,6 @@
     function kakuyomu() {
         // 本文閲覧ページのみで実行
         if (!!location.pathname.match(/\/works\/\d+\/episodes\//)) {
-
             document.addEventListener('keydown', function(e) {
                 const previous_button = document.querySelector('div#contentMain-previousEpisode > a');
                 const next_button = document.querySelector('div#contentMain-nextEpisode > a');
