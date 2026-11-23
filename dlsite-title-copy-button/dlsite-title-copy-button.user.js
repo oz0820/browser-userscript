@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DLSite title copy button
 // @namespace    https://twitter.com/oz0820
-// @version      2023.12.07.1
+// @version      2026.11.23.0
 // @description  DLSiteの作品ページで，DOJINDBに飛ぶボタンと，タイトル(作品名)をコピーするボタンを追加する
 // @author       oz0820
 // @match        https://www.dlsite.com/*
@@ -10,115 +10,129 @@
 // ==/UserScript==
 
 (function() {
-     const product_page = () => {
-         window.onload = () => {
-             let h1_tag = document.querySelector('h1')
+    const productPath = /^\/[\w-]+\/work\/=\/product_id\/\w+\.html(?:\/|$)/;
+    const listPath = /^\/[\w-]+\/(?:mypage\/wishlist|circle\/profile\/=\/maker_id)(?:\/|$)/;
+    const titleSelector = 'h1#work_name, h1.headline__title';
+    const controlsSelector = '[data-dlsite-title-copy-controls]';
+    const linkSelector = 'a[data-dlsite-dojindb-link]';
 
-             /*
-             DOJINDBに飛ぶボタンを追加する
-              */
-
-             // タイトルと同じ行の右側の要素のうち，一番左側の要素
-             const h1_right_elm = document.querySelector('h1').nextElementSibling
-
-             const computed_style = window.getComputedStyle(h1_right_elm)
-             const h1_right_right = Number(computed_style.getPropertyValue('right').replace(/[^0-9]/g, '')) // 要素の右からのオフセット
-             const h1_right_width = h1_right_elm.clientWidth // 横幅
-             const my_div_offset = h1_right_right + h1_right_width + 10
-
-             const dojindb_img = document.createElement('img')
-             dojindb_img.src = 'https://www.google.com/s2/favicons?sz=64&domain=dojindb.net'
-             dojindb_img.style.marginLeft = '6px'
-             dojindb_img.style.height = '26px'
-
-             const dojindb_elm = document.createElement('a')
-             dojindb_elm.href = `https://dojindb.net/rd?u=${window.location.href}`
-             dojindb_elm.target = '_blank'
-             dojindb_elm.title = 'DOJINDBに飛びます'
-             dojindb_elm.appendChild(dojindb_img)
-
-             const my_div = document.createElement('div')
-             my_div.style.position = 'absolute'
-             my_div.style.right = `${my_div_offset}px`
-             my_div.style.bottom = '10px'
-             my_div.style.marginRight = '0'
-             my_div.style.textAlign = 'right'
-             my_div.appendChild(dojindb_elm)
-
-             h1_tag.insertAdjacentElement('afterend', my_div)
-
-
-             /*
-             タイトルをコピーするボタンを追加
-              */
-
-             let copyButton = document.createElement('button');
-             copyButton.textContent = 'コピー';
-             copyButton.style.marginLeft = '10px'
-             copyButton.style.verticalAlign = 'top'
-
-             // ボタンがクリックされたときのイベントリスナーの追加
-             copyButton.addEventListener('click', function() {
-                 // テキストをクリップボードにコピーする
-                 let textToCopy = h1_tag.textContent.slice(0, -3);
-                 _copy_to_clipboard(textToCopy);
-
-                 // コピーが成功した場合、メッセージを出力する
-                 console.log('テキストがクリップボードにコピーされました。');
-             });
-
-             // H1タグの後ろにボタンを挿入する
-             h1_tag.appendChild(copyButton);
-         }
-     }
-
-     // wishlistやサークルページで，各商品ごとにdojindbボタンを追加する
-     const add_dojindb_button = () => {
-         window.onload = () => {
-             document.querySelectorAll('dl > dd.work_price_wrap').forEach(price_elm => {
-                 try {
-                     const work_col = price_elm.parentNode
-                     const item_url = work_col.querySelector('a').href
-
-                     const dojindb_img = document.createElement('img')
-                     dojindb_img.src = 'https://www.google.com/s2/favicons?sz=64&domain=dojindb.net'
-                     dojindb_img.style.marginLeft = '6px'
-                     dojindb_img.style.height = '16px'
-
-                     const dojindb_elm = document.createElement('a')
-                     dojindb_elm.href = `https://dojindb.net/rd?u=${item_url}`
-                     dojindb_elm.target = '_blank'
-                     dojindb_elm.title = 'DOJINDBに飛びます'
-                     dojindb_elm.appendChild(dojindb_img)
-
-                     price_elm.insertAdjacentElement('beforeend', dojindb_elm)
-                 } catch (e) {
-                     console.error(e)
-                 }
-             })
-         }
-     }
-
-
-    if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/work\/=\/product_id\/\w+.html/)) {
-        product_page()
+    function dojindbUrl(workUrl) {
+        return 'https://dojindb.net/rd?' + new URLSearchParams({u: workUrl});
     }
 
-    if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/mypage\/wishlist/)) {
-        add_dojindb_button()
-    }
-    if (location.href.match(/https:\/\/www.dlsite.com\/\w+\/circle\/profile\/=\/maker_id/)) {
-        add_dojindb_button()
+    function createDojindbLink(href, iconHeight) {
+        const icon = document.createElement('img');
+        icon.src = 'https://www.google.com/s2/favicons?sz=64&domain=dojindb.net';
+        icon.alt = 'DOJINDB';
+        icon.style.height = iconHeight;
+
+        const link = document.createElement('a');
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.title = 'DOJINDBに飛びます';
+        link.setAttribute('data-dlsite-dojindb-link', '');
+        link.appendChild(icon);
+        return link;
     }
 
+    function renderTitleButtons() {
+        const heading = document.querySelector(titleSelector);
+        if (!heading) return;
 
-    function _copy_to_clipboard(text) {
+        const href = dojindbUrl(location.href);
+        let controls = heading.parentElement.querySelector(':scope > ' + controlsSelector);
+        if (!controls) {
+            const copyButton = document.createElement('button');
+            copyButton.type = 'button';
+            copyButton.textContent = 'コピー';
+            copyButton.addEventListener('click', () => {
+                const title = document.querySelector(titleSelector)?.textContent.trim();
+                if (title) copyToClipboard(title).catch(console.error);
+            });
+
+            controls = document.createElement('span');
+            controls.setAttribute('data-dlsite-title-copy-controls', '');
+            controls.style.display = 'inline-flex';
+            controls.style.alignItems = 'center';
+            controls.style.gap = '6px';
+            controls.style.marginInlineStart = '10px';
+            controls.append(copyButton, createDojindbLink(href, '26px'));
+        }
+
+        if (heading.nextElementSibling !== controls) heading.after(controls);
+        const link = controls.querySelector(linkSelector);
+        if (link.href !== href) link.href = href;
+    }
+
+    function renderListLinks() {
+        document.querySelectorAll('dl > dd.work_price_wrap').forEach(price => {
+            const links = price.parentElement.querySelectorAll('a[href*="/work/=/product_id/"]');
+            const work = Array.from(links).find(link =>
+                link.origin === location.origin && productPath.test(link.pathname)
+            );
+            if (!work) return;
+
+            const href = dojindbUrl(work.href);
+            const existing = price.querySelector(linkSelector);
+            if (existing) {
+                if (existing.href !== href) existing.href = href;
+                return;
+            }
+
+            const link = createDojindbLink(href, '16px');
+            link.style.marginInlineStart = '6px';
+            price.appendChild(link);
+        });
+    }
+
+    async function copyToClipboard(text) {
+        if (navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return;
+            } catch {
+                // Clipboard API を使えない場合は従来の方法を試す。
+            }
+        }
+
         const textarea = document.createElement('textarea');
         textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
         document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+        try {
+            textarea.select();
+            if (!document.execCommand('copy')) throw new Error('作品名をコピーできませんでした。');
+        } finally {
+            textarea.remove();
+        }
     }
-})
-();
+
+    function renderButtons() {
+        if (productPath.test(location.pathname)) {
+            renderTitleButtons();
+        } else if (listPath.test(location.pathname)) {
+            renderListLinks();
+        }
+    }
+
+    // ページ内遷移や、後から描画・置換された要素にも対応する。
+    let renderScheduled = false;
+    function scheduleRender() {
+        if (renderScheduled) return;
+        renderScheduled = true;
+        requestAnimationFrame(() => {
+            renderScheduled = false;
+            renderButtons();
+        });
+    }
+
+    renderButtons();
+    new MutationObserver(scheduleRender).observe(document.documentElement, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+    });
+    window.addEventListener('popstate', scheduleRender);
+})();
